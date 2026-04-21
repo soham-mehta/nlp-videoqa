@@ -1,0 +1,5 @@
+yt-dlp>=2025.1.15
+faster-whisper>=1.1.0
+opencv-python>=4.10.0.84
+numpy>=2.0.0
+tqdm>=4.66.0

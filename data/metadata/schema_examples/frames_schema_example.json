@@ -1,0 +1,24 @@
+{
+  "video_id": "dQw4w9WgXcQ",
+  "source_video_path": "data/raw_videos/dQw4w9WgXcQ__Example.mp4",
+  "fps": 29.97,
+  "frame_count": 5400,
+  "duration_sec": 180.12,
+  "interval_sec": 1.0,
+  "frames": [
+    {
+      "timestamp_sec": 0.0,
+      "frame_index": 0,
+      "image_path": "data/frames/dQw4w9WgXcQ/0000000000.jpg",
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "timestamp_sec": 1.0,
+      "frame_index": 1,
+      "image_path": "data/frames/dQw4w9WgXcQ/0000001000.jpg",
+      "width": 1280,
+      "height": 720
+    }
+  ]
+}

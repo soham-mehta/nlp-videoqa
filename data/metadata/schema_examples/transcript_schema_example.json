@@ -1,0 +1,17 @@
+{
+  "video_id": "dQw4w9WgXcQ",
+  "language": "en",
+  "language_probability": 0.97,
+  "segments": [
+    {
+      "start": 0.0,
+      "end": 3.52,
+      "text": "We're no strangers to love."
+    },
+    {
+      "start": 3.52,
+      "end": 7.1,
+      "text": "You know the rules and so do I."
+    }
+  ]
+}

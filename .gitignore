@@ -1,0 +1,26 @@
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+
+# macOS
+.DS_Store
+
+# Large / regenerated pipeline outputs (re-run scripts locally)
+/data/raw_videos/*
+!/data/raw_videos/.gitkeep
+/data/audio/*
+!/data/audio/.gitkeep
+/data/frames/*
+!/data/frames/.gitkeep
+/data/transcripts/*
+!/data/transcripts/.gitkeep
+/data/metadata/videos/*
+!/data/metadata/videos/.gitkeep
+/data/metadata/frames/*
+!/data/metadata/frames/.gitkeep
+
+# Generated index (machine-specific paths); regenerate via download script
+/data/metadata/videos_index.json
