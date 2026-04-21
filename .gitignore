@@ -22,5 +22,5 @@ __pycache__/
 /data/metadata/frames/*
 !/data/metadata/frames/.gitkeep
 
-# Generated index (machine-specific paths); regenerate via download script
+# Generated index (machine-specific paths); merge via download or rebuild
 /data/metadata/videos_index.json

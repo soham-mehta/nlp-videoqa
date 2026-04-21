@@ -57,7 +57,17 @@ PATHS = Paths(root=REPO_ROOT)
 
 # Download 3–5 YouTube URLs here.
 YOUTUBE_URLS: list[str] = [
-    "https://www.youtube.com/watch?v=EfKLrSxA_H8"
+    #"https://www.youtube.com/watch?v=EfKLrSxA_H8",
+    # "https://www.youtube.com/watch?v=o64FV-ez6Gw",
+    # "https://www.youtube.com/watch?v=Z_c4byLrNBU",
+    # "https://www.youtube.com/watch?v=glWFuobqIqQ",
+    # "https://www.youtube.com/watch?v=bBC-nXj3Ng4",
+    "https://www.youtube.com/watch?v=CxGSnA-RTsA",
+    "https://www.youtube.com/watch?v=eMZmDH3T2bY",
+    "https://www.youtube.com/watch?v=dpJrM2_NOT8",
+    "https://www.youtube.com/watch?v=EgpLj86ZHFQ",
+    "https://www.youtube.com/watch?v=KZeIEiBrT_w",
+
 ]
 
 
