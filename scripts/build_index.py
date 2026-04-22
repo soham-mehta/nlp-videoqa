@@ -19,6 +19,8 @@ def main() -> None:
     cfg = AppConfig(
         paths=cfg.paths,
         indexing=cfg.indexing,
+        retrieval=cfg.retrieval,
+        generation=cfg.generation,
         embedding=EmbeddingConfig(
             model_name=args.model_name,
             device=args.device,

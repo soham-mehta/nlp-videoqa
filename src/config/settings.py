@@ -47,10 +47,29 @@ class IndexConfig:
 
 
 @dataclass(frozen=True)
+class RetrievalPolicyConfig:
+    top_k_total: int = 8
+    max_text_items: int = 4
+    max_frame_items: int = 4
+    dedupe_seconds: float = 1.0
+
+
+@dataclass(frozen=True)
+class GenerationConfig:
+    model_name: str = "Qwen/Qwen2.5-VL-3B-Instruct"
+    device: str = "cpu"
+    max_new_tokens: int = 256
+    temperature: float = 0.2
+    do_sample: bool = False
+
+
+@dataclass(frozen=True)
 class AppConfig:
     paths: PathsConfig
     embedding: EmbeddingConfig
     indexing: IndexConfig
+    retrieval: RetrievalPolicyConfig
+    generation: GenerationConfig
 
     @staticmethod
     def default(repo_root: Path | None = None) -> "AppConfig":
@@ -59,4 +78,6 @@ class AppConfig:
             paths=PathsConfig.from_repo_root(root),
             embedding=EmbeddingConfig(),
             indexing=IndexConfig(),
+            retrieval=RetrievalPolicyConfig(),
+            generation=GenerationConfig(),
         )

@@ -1,0 +1,270 @@
+{
+  "request": {
+    "question": "What concept is introduced first?",
+    "video_id": "CxGSnA-RTsA",
+    "system_prompt": null,
+    "retrieval_policy": {
+      "top_k_total": 8,
+      "max_text_items": 4,
+      "max_frame_items": 4,
+      "dedupe_seconds": 1.0
+    }
+  },
+  "final_answer": "arrays",
+  "retrieved_items": [
+    {
+      "item_id": "CxGSnA-RTsA:text:seg_000120",
+      "video_id": "CxGSnA-RTsA",
+      "modality": "text",
+      "score": 0.7559933662414551,
+      "timestamp_start": 470.74,
+      "timestamp_end": 474.74,
+      "text": "points, for example in Google Maps. There's two main ways to search a graph, but the first",
+      "frame_path": null,
+      "source_id": "seg_000120"
+    },
+    {
+      "item_id": "CxGSnA-RTsA:text:seg_000024",
+      "video_id": "CxGSnA-RTsA",
+      "modality": "text",
+      "score": 0.7527565360069275,
+      "timestamp_start": 88.9,
+      "timestamp_end": 94.02,
+      "text": "But even though computers understand zeros and ones, for humans, it's not really all that useful.",
+      "frame_path": null,
+      "source_id": "seg_000024"
+    },
+    {
+      "item_id": "CxGSnA-RTsA:text:seg_000116",
+      "video_id": "CxGSnA-RTsA",
+      "modality": "text",
+      "score": 0.7479963898658752,
+      "timestamp_start": 454.02,
+      "timestamp_end": 457.94,
+      "text": "points as a data structure. If you take the nodes of a linked list, but allow any node to point",
+      "frame_path": null,
+      "source_id": "seg_000116"
+    },
+    {
+      "item_id": "CxGSnA-RTsA:text:seg_000068",
+      "video_id": "CxGSnA-RTsA",
+      "modality": "text",
+      "score": 0.7471947073936462,
+      "timestamp_start": 254.42,
+      "timestamp_end": 258.02,
+      "text": "it's some number times the power telling you where to put the decimal point, which is exactly",
+      "frame_path": null,
+      "source_id": "seg_000068"
+    },
+    {
+      "item_id": "CxGSnA-RTsA:frame:466",
+      "video_id": "CxGSnA-RTsA",
+      "modality": "frame",
+      "score": 0.08553894609212875,
+      "timestamp_start": 466.0,
+      "timestamp_end": 467.0,
+      "text": null,
+      "frame_path": "/Users/arnav/git/nlp-videoqa/data/frames/CxGSnA-RTsA/0000466000.jpg",
+      "source_id": "466"
+    },
+    {
+      "item_id": "CxGSnA-RTsA:frame:464",
+      "video_id": "CxGSnA-RTsA",
+      "modality": "frame",
+      "score": 0.08096293359994888,
+      "timestamp_start": 464.0,
+      "timestamp_end": 465.0,
+      "text": null,
+      "frame_path": "/Users/arnav/git/nlp-videoqa/data/frames/CxGSnA-RTsA/0000464000.jpg",
+      "source_id": "464"
+    },
+    {
+      "item_id": "CxGSnA-RTsA:frame:396",
+      "video_id": "CxGSnA-RTsA",
+      "modality": "frame",
+      "score": 0.06912567466497421,
+      "timestamp_start": 396.0,
+      "timestamp_end": 397.0,
+      "text": null,
+      "frame_path": "/Users/arnav/git/nlp-videoqa/data/frames/CxGSnA-RTsA/0000396000.jpg",
+      "source_id": "396"
+    }
+  ],
+  "evidence_bundle": {
+    "question": "What concept is introduced first?",
+    "transcripts": [
+      {
+        "evidence_id": "CxGSnA-RTsA:text:seg_000120",
+        "video_id": "CxGSnA-RTsA",
+        "timestamp_start": 470.74,
+        "timestamp_end": 474.74,
+        "text": "points, for example in Google Maps. There's two main ways to search a graph, but the first",
+        "source_id": "seg_000120"
+      },
+      {
+        "evidence_id": "CxGSnA-RTsA:text:seg_000024",
+        "video_id": "CxGSnA-RTsA",
+        "timestamp_start": 88.9,
+        "timestamp_end": 94.02,
+        "text": "But even though computers understand zeros and ones, for humans, it's not really all that useful.",
+        "source_id": "seg_000024"
+      },
+      {
+        "evidence_id": "CxGSnA-RTsA:text:seg_000116",
+        "video_id": "CxGSnA-RTsA",
+        "timestamp_start": 454.02,
+        "timestamp_end": 457.94,
+        "text": "points as a data structure. If you take the nodes of a linked list, but allow any node to point",
+        "source_id": "seg_000116"
+      },
+      {
+        "evidence_id": "CxGSnA-RTsA:text:seg_000068",
+        "video_id": "CxGSnA-RTsA",
+        "timestamp_start": 254.42,
+        "timestamp_end": 258.02,
+        "text": "it's some number times the power telling you where to put the decimal point, which is exactly",
+        "source_id": "seg_000068"
+      }
+    ],
+    "frames": [
+      {
+        "evidence_id": "CxGSnA-RTsA:frame:466",
+        "video_id": "CxGSnA-RTsA",
+        "timestamp_start": 466.0,
+        "timestamp_end": 467.0,
+        "frame_path": "/Users/arnav/git/nlp-videoqa/data/frames/CxGSnA-RTsA/0000466000.jpg",
+        "source_id": "466",
+        "caption": null
+      },
+      {
+        "evidence_id": "CxGSnA-RTsA:frame:464",
+        "video_id": "CxGSnA-RTsA",
+        "timestamp_start": 464.0,
+        "timestamp_end": 465.0,
+        "frame_path": "/Users/arnav/git/nlp-videoqa/data/frames/CxGSnA-RTsA/0000464000.jpg",
+        "source_id": "464",
+        "caption": null
+      },
+      {
+        "evidence_id": "CxGSnA-RTsA:frame:396",
+        "video_id": "CxGSnA-RTsA",
+        "timestamp_start": 396.0,
+        "timestamp_end": 397.0,
+        "frame_path": "/Users/arnav/git/nlp-videoqa/data/frames/CxGSnA-RTsA/0000396000.jpg",
+        "source_id": "396",
+        "caption": null
+      }
+    ],
+    "retrieved_items": [
+      {
+        "item_id": "CxGSnA-RTsA:text:seg_000120",
+        "video_id": "CxGSnA-RTsA",
+        "modality": "text",
+        "score": 0.7559933662414551,
+        "timestamp_start": 470.74,
+        "timestamp_end": 474.74,
+        "text": "points, for example in Google Maps. There's two main ways to search a graph, but the first",
+        "frame_path": null,
+        "source_id": "seg_000120"
+      },
+      {
+        "item_id": "CxGSnA-RTsA:text:seg_000024",
+        "video_id": "CxGSnA-RTsA",
+        "modality": "text",
+        "score": 0.7527565360069275,
+        "timestamp_start": 88.9,
+        "timestamp_end": 94.02,
+        "text": "But even though computers understand zeros and ones, for humans, it's not really all that useful.",
+        "frame_path": null,
+        "source_id": "seg_000024"
+      },
+      {
+        "item_id": "CxGSnA-RTsA:text:seg_000116",
+        "video_id": "CxGSnA-RTsA",
+        "modality": "text",
+        "score": 0.7479963898658752,
+        "timestamp_start": 454.02,
+        "timestamp_end": 457.94,
+        "text": "points as a data structure. If you take the nodes of a linked list, but allow any node to point",
+        "frame_path": null,
+        "source_id": "seg_000116"
+      },
+      {
+        "item_id": "CxGSnA-RTsA:text:seg_000068",
+        "video_id": "CxGSnA-RTsA",
+        "modality": "text",
+        "score": 0.7471947073936462,
+        "timestamp_start": 254.42,
+        "timestamp_end": 258.02,
+        "text": "it's some number times the power telling you where to put the decimal point, which is exactly",
+        "frame_path": null,
+        "source_id": "seg_000068"
+      },
+      {
+        "item_id": "CxGSnA-RTsA:frame:466",
+        "video_id": "CxGSnA-RTsA",
+        "modality": "frame",
+        "score": 0.08553894609212875,
+        "timestamp_start": 466.0,
+        "timestamp_end": 467.0,
+        "text": null,
+        "frame_path": "/Users/arnav/git/nlp-videoqa/data/frames/CxGSnA-RTsA/0000466000.jpg",
+        "source_id": "466"
+      },
+      {
+        "item_id": "CxGSnA-RTsA:frame:464",
+        "video_id": "CxGSnA-RTsA",
+        "modality": "frame",
+        "score": 0.08096293359994888,
+        "timestamp_start": 464.0,
+        "timestamp_end": 465.0,
+        "text": null,
+        "frame_path": "/Users/arnav/git/nlp-videoqa/data/frames/CxGSnA-RTsA/0000464000.jpg",
+        "source_id": "464"
+      },
+      {
+        "item_id": "CxGSnA-RTsA:frame:396",
+        "video_id": "CxGSnA-RTsA",
+        "modality": "frame",
+        "score": 0.06912567466497421,
+        "timestamp_start": 396.0,
+        "timestamp_end": 397.0,
+        "text": null,
+        "frame_path": "/Users/arnav/git/nlp-videoqa/data/frames/CxGSnA-RTsA/0000396000.jpg",
+        "source_id": "396"
+      }
+    ]
+  },
+  "generated_answer": {
+    "answer_text": "arrays",
+    "model_name": "Qwen/Qwen2-VL-2B-Instruct",
+    "prompt_text": "Question:\nWhat concept is introduced first?\n\nTranscript evidence:\n- [CxGSnA-RTsA:text:seg_000120] 470.74-474.74s: points, for example in Google Maps. There's two main ways to search a graph, but the first\n- [CxGSnA-RTsA:text:seg_000024] 88.90-94.02s: But even though computers understand zeros and ones, for humans, it's not really all that useful.\n- [CxGSnA-RTsA:text:seg_000116] 454.02-457.94s: points as a data structure. If you take the nodes of a linked list, but allow any node to point\n- [CxGSnA-RTsA:text:seg_000068] 254.42-258.02s: it's some number times the power telling you where to put the decimal point, which is exactly\n\nFrame evidence:\n- [CxGSnA-RTsA:frame:466] 466.00-467.00s: /Users/arnav/git/nlp-videoqa/data/frames/CxGSnA-RTsA/0000466000.jpg\n- [CxGSnA-RTsA:frame:464] 464.00-465.00s: /Users/arnav/git/nlp-videoqa/data/frames/CxGSnA-RTsA/0000464000.jpg\n- [CxGSnA-RTsA:frame:396] 396.00-397.00s: /Users/arnav/git/nlp-videoqa/data/frames/CxGSnA-RTsA/0000396000.jpg\n\nAnswer using only the evidence above. If evidence is insufficient, explicitly say what is missing.",
+    "used_evidence_ids": [
+      "CxGSnA-RTsA:text:seg_000120",
+      "CxGSnA-RTsA:text:seg_000024",
+      "CxGSnA-RTsA:text:seg_000116",
+      "CxGSnA-RTsA:text:seg_000068",
+      "CxGSnA-RTsA:frame:466",
+      "CxGSnA-RTsA:frame:464",
+      "CxGSnA-RTsA:frame:396"
+    ],
+    "raw_response_text": "system\nYou are answering questions about a specific video using only the provided retrieved evidence.\nThe evidence may include transcript excerpts and video frames.\nBase your answer only on that evidence.\nIf the evidence is incomplete or ambiguous, say that clearly.\nPrefer precise answers over broad guesses.\nWhen useful, mention which timestamps or evidence items support the answer.\nDo not claim certainty when the evidence does not support it.\nDo not include hidden reasoning; output only the final grounded answer.\nuser\nQuestion:\nWhat concept is introduced first?\n\nTranscript evidence:\n- [CxGSnA-RTsA:text:seg_000120] 470.74-474.74s: points, for example in Google Maps. There's two main ways to search a graph, but the first\n- [CxGSnA-RTsA:text:seg_000024] 88.90-94.02s: But even though computers understand zeros and ones, for humans, it's not really all that useful.\n- [CxGSnA-RTsA:text:seg_000116] 454.02-457.94s: points as a data structure. If you take the nodes of a linked list, but allow any node to point\n- [CxGSnA-RTsA:text:seg_000068] 254.42-258.02s: it's some number times the power telling you where to put the decimal point, which is exactly\n\nFrame evidence:\n- [CxGSnA-RTsA:frame:466] 466.00-467.00s: /Users/arnav/git/nlp-videoqa/data/frames/CxGSnA-RTsA/0000466000.jpg\n- [CxGSnA-RTsA:frame:464] 464.00-465.00s: /Users/arnav/git/nlp-videoqa/data/frames/CxGSnA-RTsA/0000464000.jpg\n- [CxGSnA-RTsA:frame:396] 396.00-397.00s: /Users/arnav/git/nlp-videoqa/data/frames/CxGSnA-RTsA/0000396000.jpg\n\nAnswer using only the evidence above. If evidence is insufficient, explicitly say what is missing.\nassistant\narrays",
+    "metadata": {
+      "duration_sec": 105.048,
+      "num_images": 3
+    }
+  },
+  "debug_info": {
+    "duration_sec": 105.675,
+    "retrieved_count_before_policy": 8,
+    "retrieved_count_after_policy": 7,
+    "num_transcript_evidence": 4,
+    "num_frame_evidence": 3,
+    "retrieval_policy": {
+      "top_k_total": 8,
+      "max_text_items": 4,
+      "max_frame_items": 4,
+      "dedupe_seconds": 1.0
+    }
+  }
+}

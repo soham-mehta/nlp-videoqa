@@ -96,3 +96,26 @@ Query index:
 ```bash
 python scripts/query_index.py "How does the speaker set up the project?" --top-k 5
 ```
+
+Run baseline multimodal RAG answerer (retrieval + Qwen2.5-VL generation):
+
+```bash
+KMP_DUPLICATE_LIB_OK=TRUE PYTHONPATH=. python3 scripts/answer_question.py "What is computer science?" --video-id CxGSnA-RTsA
+```
+
+This saves a JSON run artifact under `data/runs/answers/` by default.
+
+Run benchmark:
+
+```bash
+KMP_DUPLICATE_LIB_OK=TRUE PYTHONPATH=. python3 scripts/run_benchmark.py --benchmark-path data/benchmark/example_benchmark_v1.jsonl
+```
+
+Compare any system predictions against benchmark ground truth:
+
+```bash
+PYTHONPATH=. python3 scripts/grade_predictions.py \
+  --benchmark-path data/benchmark/example_benchmark_v1.jsonl \
+  --predictions-jsonl data/eval/benchmark_questions.jsonl \
+  --system-name baseline_rag
+```
