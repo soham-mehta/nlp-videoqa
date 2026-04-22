@@ -71,3 +71,28 @@ print(" ".join(s["text"] for s in segments))
 
 - Frame lookup uses **nearest timestamp** matching.
 - Transcript lookup returns **all segments overlapping** the requested time window.
+
+## Retrieval scaffold (v1)
+
+New modular scaffold for indexing/retrieval lives under:
+
+- `src/config/`
+- `src/data/`
+- `src/models/`
+- `src/indexing/`
+- `src/retrieval/`
+- `src/benchmark/`
+- `src/eval/`
+- `src/utils/`
+
+Build index:
+
+```bash
+python scripts/build_index.py --device cpu
+```
+
+Query index:
+
+```bash
+python scripts/query_index.py "How does the speaker set up the project?" --top-k 5
+```
