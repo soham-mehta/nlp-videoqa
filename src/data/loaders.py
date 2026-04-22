@@ -53,6 +53,18 @@ def enumerate_frames_for_video(paths: PathsConfig, video_id: str) -> list[FrameI
     Enumerate frame records for one video.
     Prefers `data/metadata/frames/<video_id>.json`, falls back to image file glob.
     """
+    def _normalize_frame_path(raw_path: str) -> str:
+        p = Path(raw_path)
+        if p.is_absolute():
+            return str(p)
+        candidate_1 = (paths.repo_root / raw_path).resolve()
+        if candidate_1.exists():
+            return str(candidate_1)
+        candidate_2 = (paths.repo_root / "data" / raw_path).resolve()
+        if candidate_2.exists():
+            return str(candidate_2)
+        return raw_path
+
     metadata_path = paths.frames_metadata_dir / f"{video_id}.json"
     if metadata_path.exists():
         payload = read_json(metadata_path)
@@ -62,6 +74,7 @@ def enumerate_frames_for_video(paths: PathsConfig, video_id: str) -> list[FrameI
             image_path = str(frame.get("image_path", ""))
             if not image_path:
                 continue
+            image_path = _normalize_frame_path(image_path)
             out.append(
                 FrameItem(
                     video_id=video_id,

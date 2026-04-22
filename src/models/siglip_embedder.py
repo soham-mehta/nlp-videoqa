@@ -17,6 +17,21 @@ def _l2_normalize(vectors: np.ndarray) -> np.ndarray:
     return vectors / norms
 
 
+def _features_to_numpy(features: torch.Tensor | object) -> np.ndarray:
+    """
+    Handle both tensor outputs and model output objects.
+    """
+    if isinstance(features, torch.Tensor):
+        tensor = features
+    elif hasattr(features, "pooler_output") and isinstance(features.pooler_output, torch.Tensor):
+        tensor = features.pooler_output
+    elif hasattr(features, "last_hidden_state") and isinstance(features.last_hidden_state, torch.Tensor):
+        tensor = features.last_hidden_state.mean(dim=1)
+    else:
+        raise TypeError(f"Unsupported feature output type: {type(features)}")
+    return tensor.detach().cpu().numpy().astype(np.float32)
+
+
 class SigLIP2EmbeddingModel(EmbeddingModel):
     """
     Shared-space text/image embedding model using Hugging Face SigLIP/SigLIP2 checkpoints.
@@ -43,7 +58,7 @@ class SigLIP2EmbeddingModel(EmbeddingModel):
                 batch = texts[start:end]
                 encoded = self.processor(text=batch, padding=True, return_tensors="pt").to(self.device)
                 features = self.model.get_text_features(**encoded)
-                output.append(features.detach().cpu().numpy().astype(np.float32))
+                output.append(_features_to_numpy(features))
         vectors = np.concatenate(output, axis=0)
         return _l2_normalize(vectors) if self.config.normalize else vectors
 
@@ -56,6 +71,6 @@ class SigLIP2EmbeddingModel(EmbeddingModel):
                 batch = images[start:end]
                 encoded = self.processor(images=batch, return_tensors="pt").to(self.device)
                 features = self.model.get_image_features(**encoded)
-                output.append(features.detach().cpu().numpy().astype(np.float32))
+                output.append(_features_to_numpy(features))
         vectors = np.concatenate(output, axis=0)
         return _l2_normalize(vectors) if self.config.normalize else vectors
