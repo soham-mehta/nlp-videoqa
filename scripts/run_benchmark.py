@@ -8,6 +8,7 @@ from pathlib import Path
 from src.config.settings import AppConfig, EmbeddingConfig, GenerationConfig
 from src.eval.benchmark_runner import run_benchmark
 from src.eval.reporting import save_benchmark_run
+from src.utils.io import write_jsonl
 from src.models.siglip_embedder import SigLIP2EmbeddingModel
 from src.rag.answering import BaselineRAGAnsweringService
 from src.rag.qwen_vl_generator import QwenVLGenerator
@@ -31,7 +32,18 @@ def main() -> None:
     parser.add_argument("--device", type=str, default="cpu")
     parser.add_argument("--system-name", type=str, default="baseline_rag")
     parser.add_argument("--output-json", type=Path, default=Path("data/eval/benchmark_run.json"))
-    parser.add_argument("--output-jsonl", type=Path, default=Path("data/eval/benchmark_questions.jsonl"))
+    parser.add_argument(
+        "--predictions-jsonl",
+        type=Path,
+        default=Path("data/eval/predictions_v1.jsonl"),
+        help="Strict prediction_v1 JSONL for grading and cross-system comparison.",
+    )
+    parser.add_argument(
+        "--detail-jsonl",
+        type=Path,
+        default=None,
+        help="Optional verbose per-question JSONL (metrics + debug). Omit to skip.",
+    )
     args = parser.parse_args()
 
     cfg = AppConfig.default(repo_root=args.repo_root)
@@ -64,9 +76,15 @@ def main() -> None:
         system_name=args.system_name,
     )
     run_dict = asdict(result)
-    per_question_rows = run_dict.get("per_question", [])
-    save_benchmark_run(args.output_json, args.output_jsonl, run_dict, per_question_rows)
+    prediction_rows = run_dict.get("prediction_rows", [])
+    if args.predictions_jsonl is not None:
+        write_jsonl(args.predictions_jsonl, prediction_rows)
+    save_benchmark_run(args.output_json, args.detail_jsonl, run_dict, run_dict.get("per_question", []))
     print(json.dumps(run_dict, indent=2, ensure_ascii=False))
+    if args.predictions_jsonl is not None:
+        print(f"\nSaved strict predictions (prediction_v1) to: {args.predictions_jsonl}")
+    if args.detail_jsonl is not None:
+        print(f"Saved detail per-question rows to: {args.detail_jsonl}")
 
 
 if __name__ == "__main__":

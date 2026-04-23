@@ -111,11 +111,29 @@ Run benchmark:
 KMP_DUPLICATE_LIB_OK=TRUE PYTHONPATH=. python3 scripts/run_benchmark.py --benchmark-path data/benchmark/example_benchmark_v1.jsonl
 ```
 
-Compare any system predictions against benchmark ground truth:
+This writes:
+
+- `data/eval/benchmark_run.json` — full run (metrics + per-question debug + embedded `prediction_rows`)
+- `data/eval/predictions_v1.jsonl` — **strict shared format** for grading (`schema_version: prediction_v1`)
+
+Optional verbose per-question JSONL (metrics + debug only):
+
+```bash
+KMP_DUPLICATE_LIB_OK=TRUE PYTHONPATH=. python3 scripts/run_benchmark.py \
+  --benchmark-path data/benchmark/example_benchmark_v1.jsonl \
+  --detail-jsonl data/eval/benchmark_questions_detail.jsonl
+```
+
+Schema for predictions: `data/benchmark/prediction_schema_v1.json`.  
+Helper types and builders: `src/eval/prediction_schema.py` (`build_prediction_row`, `validate_prediction_row`).
+
+Compare any system’s **prediction_v1** JSONL against benchmark ground truth:
 
 ```bash
 PYTHONPATH=. python3 scripts/grade_predictions.py \
   --benchmark-path data/benchmark/example_benchmark_v1.jsonl \
-  --predictions-jsonl data/eval/benchmark_questions.jsonl \
+  --predictions-jsonl data/eval/predictions_v1.jsonl \
   --system-name baseline_rag
 ```
+
+Use `--no-strict` only if you must grade legacy rows that omit `schema_version`.

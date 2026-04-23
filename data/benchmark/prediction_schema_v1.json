@@ -1,0 +1,73 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "VideoQA system predictions v1",
+  "description": "One JSON object per line (JSONL). All systems (baseline RAG, agentic, etc.) should emit this format for fair grading.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "system_name",
+    "run_id",
+    "question_id",
+    "video_id",
+    "question",
+    "final_answer",
+    "retrieved_items"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "prediction_v1"
+    },
+    "system_name": {
+      "type": "string",
+      "description": "Identifier for the system that produced this row (e.g. baseline_rag, agent_v2)."
+    },
+    "run_id": {
+      "type": "string",
+      "description": "UUID or unique id grouping rows from one benchmark run."
+    },
+    "question_id": { "type": "string" },
+    "video_id": { "type": "string" },
+    "question": { "type": "string" },
+    "final_answer": {
+      "type": "string",
+      "description": "Final grounded answer text only (no hidden chain-of-thought)."
+    },
+    "retrieved_items": {
+      "type": "array",
+      "description": "Evidence items passed to the answerer (same shape as retrieval layer output).",
+      "items": {
+        "type": "object",
+        "required": [
+          "item_id",
+          "video_id",
+          "modality",
+          "score",
+          "timestamp_start",
+          "timestamp_end"
+        ],
+        "properties": {
+          "item_id": { "type": "string" },
+          "video_id": { "type": "string" },
+          "modality": { "type": "string", "enum": ["text", "frame"] },
+          "score": { "type": "number" },
+          "timestamp_start": { "type": "number" },
+          "timestamp_end": { "type": "number" },
+          "text": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }]
+          },
+          "frame_path": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }]
+          },
+          "source_id": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }]
+          }
+        }
+      }
+    },
+    "config": {
+      "type": "object",
+      "description": "Optional snapshot of retrieval/model settings for reproducibility."
+    }
+  }
+}

@@ -7,6 +7,7 @@ from typing import Any
 
 from src.benchmark.io import load_benchmark_items
 from src.eval.metrics import answer_metrics
+from src.eval.prediction_schema import SCHEMA_VERSION, validate_prediction_row
 from src.eval.schemas import AnswerMetrics, RetrievalMetrics
 from src.utils.io import read_jsonl
 
@@ -54,6 +55,7 @@ def grade_predictions(
     predictions_jsonl_path: str,
     *,
     system_name: str = "candidate_system",
+    strict_schema: bool = True,
 ) -> dict[str, Any]:
     benchmark = load_benchmark_items(benchmark_path)
     benchmark_by_qid = {b.question_id: b for b in benchmark}
@@ -62,12 +64,24 @@ def grade_predictions(
     per_question: list[dict[str, Any]] = []
     retrieval_scores: list[RetrievalMetrics] = []
     answer_scores: list[AnswerMetrics] = []
+    validation_errors: list[dict[str, Any]] = []
 
     for pred in preds:
         qid = str(pred.get("question_id", ""))
         if qid not in benchmark_by_qid:
             continue
         gold = benchmark_by_qid[qid]
+        errs: list[str] = []
+        if pred.get("schema_version") == SCHEMA_VERSION:
+            errs = validate_prediction_row(pred)
+        elif strict_schema:
+            errs = [
+                f"schema_version must be {SCHEMA_VERSION!r} for strict grading, got {pred.get('schema_version')!r}"
+            ]
+        if errs:
+            validation_errors.append({"question_id": qid, "errors": errs})
+            continue
+
         predicted_answer = str(pred.get("final_answer", pred.get("answer", "")))
         predicted_items = list(pred.get("retrieved_items", []))
         if not predicted_items:
@@ -105,6 +119,9 @@ def grade_predictions(
         "system_name": system_name,
         "benchmark_path": benchmark_path,
         "predictions_jsonl_path": predictions_jsonl_path,
+        "strict_schema": strict_schema,
+        "schema_version_expected": SCHEMA_VERSION,
+        "validation_errors": validation_errors,
         "num_questions_scored": len(per_question),
         "aggregate_retrieval_metrics": {
             "top_k_hit": _avg([x.top_k_hit for x in retrieval_scores]),

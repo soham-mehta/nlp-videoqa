@@ -32,4 +32,6 @@ class BenchmarkRunResult:
     aggregate_retrieval_metrics: RetrievalMetrics
     aggregate_answer_metrics: AnswerMetrics
     per_question: list[BenchmarkQuestionResult]
+    # Strict JSONL rows for prediction_v1 (grading, cross-system comparison).
+    prediction_rows: list[dict[str, Any]] = field(default_factory=list)
     metadata: dict[str, Any] = field(default_factory=dict)
