@@ -1,0 +1,69 @@
+{
+  "system_name": "candidate_system",
+  "benchmark_path": "data/benchmark/e2e_three_videos_v1.jsonl",
+  "predictions_jsonl_path": "data/eval/predictions_e2e_v1.jsonl",
+  "strict_schema": true,
+  "schema_version_expected": "prediction_v1",
+  "validation_errors": [],
+  "num_questions_scored": 3,
+  "aggregate_retrieval_metrics": {
+    "top_k_hit": 0.3333333333333333,
+    "evidence_overlap_hit": 0.3333333333333333,
+    "evidence_recall_proxy": 0.3333333333333333
+  },
+  "aggregate_answer_metrics": {
+    "exact_match": 0.3333333333333333,
+    "normalized_match": 0.3333333333333333,
+    "token_f1": 0.5476190476190477
+  },
+  "per_question": [
+    {
+      "question_id": "q_cx_001",
+      "question": "What does the speaker say computers understand, as opposed to what is useful for humans?",
+      "gold_answer": "Computers understand zeros and ones (binary), which is not very useful for humans without encodings.",
+      "predicted_answer": "computers understand zeros and ones, for humans, it's not really all that useful.",
+      "retrieval_metrics": {
+        "top_k_hit": 1.0,
+        "evidence_overlap_hit": 1.0,
+        "evidence_recall_proxy": 1.0
+      },
+      "answer_metrics": {
+        "exact_match": 0.0,
+        "normalized_match": 0.0,
+        "token_f1": 0.6428571428571429
+      }
+    },
+    {
+      "question_id": "q_ef_001",
+      "question": "What is the formal name of the live coding streaming series introduced in the opening?",
+      "gold_answer": "The live coding with Yocto project streaming series.",
+      "predicted_answer": "Missing",
+      "retrieval_metrics": {
+        "top_k_hit": 0.0,
+        "evidence_overlap_hit": 0.0,
+        "evidence_recall_proxy": 0.0
+      },
+      "answer_metrics": {
+        "exact_match": 0.0,
+        "normalized_match": 0.0,
+        "token_f1": 0.0
+      }
+    },
+    {
+      "question_id": "q_eg_001",
+      "question": "Which Python module does the speaker say you will use to write unit tests in this video?",
+      "gold_answer": "pytest",
+      "predicted_answer": "pytest",
+      "retrieval_metrics": {
+        "top_k_hit": 0.0,
+        "evidence_overlap_hit": 0.0,
+        "evidence_recall_proxy": 0.0
+      },
+      "answer_metrics": {
+        "exact_match": 1.0,
+        "normalized_match": 1.0,
+        "token_f1": 1.0
+      }
+    }
+  ]
+}

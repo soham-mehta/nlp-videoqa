@@ -1,7 +1,10 @@
 from __future__ import annotations
 
+import time
 import uuid
 from dataclasses import asdict
+from datetime import datetime, timezone
+from pathlib import Path
 from statistics import mean
 from typing import Any
 
@@ -41,6 +44,18 @@ def _avg_answer(xs: list[AnswerMetrics]) -> AnswerMetrics:
     )
 
 
+def append_benchmark_progress(path: str | None, line: str) -> None:
+    """Append one UTF-8 line (no carriage returns) for tail -f while a run is in the background."""
+    if not path:
+        return
+    p = Path(path)
+    p.parent.mkdir(parents=True, exist_ok=True)
+    ts = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    with p.open("a", encoding="utf-8") as f:
+        f.write(f"{ts} {line}\n")
+        f.flush()
+
+
 def run_benchmark(
     rag_service: BaselineRAGAnsweringService,
     benchmark_path: str,
@@ -50,9 +65,15 @@ def run_benchmark(
     max_frame_items: int = 4,
     system_name: str = "baseline_rag",
     show_progress: bool = True,
+    progress_file: str | None = None,
 ) -> BenchmarkRunResult:
     items = load_benchmark_items(benchmark_path)
     run_id = str(uuid.uuid4())
+    total = len(items)
+    append_benchmark_progress(
+        progress_file,
+        f"[init] run_id={run_id} n_questions={total} benchmark={benchmark_path}",
+    )
     per_question: list[BenchmarkQuestionResult] = []
     prediction_rows: list[dict[str, Any]] = []
     retrieval_scores: list[RetrievalMetrics] = []
@@ -62,13 +83,19 @@ def run_benchmark(
         items,
         desc="Benchmark",
         unit="question",
+        total=total,
         disable=not show_progress,
         leave=True,
         dynamic_ncols=True,
     )
-    for item in iterator:
+    for idx, item in enumerate(iterator, start=1):
         if show_progress:
             iterator.set_postfix_str(item.question_id[:40], refresh=False)
+        append_benchmark_progress(
+            progress_file,
+            f"[{idx}/{total}] START question_id={item.question_id} video_id={item.video_id}",
+        )
+        t0 = time.perf_counter()
         request = AnswerRequest(
             question=item.question,
             video_id=item.video_id,
@@ -116,6 +143,16 @@ def run_benchmark(
                 },
             )
         )
+        elapsed = time.perf_counter() - t0
+        append_benchmark_progress(
+            progress_file,
+            f"[{idx}/{total}] DONE question_id={item.question_id} elapsed_s={elapsed:.1f}",
+        )
+
+    append_benchmark_progress(
+        progress_file,
+        f"[loop_complete] run_id={run_id} all_{total}_questions_answered",
+    )
 
     return BenchmarkRunResult(
         aggregate_retrieval_metrics=_avg_retrieval(retrieval_scores),

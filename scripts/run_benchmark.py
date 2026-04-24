@@ -6,6 +6,7 @@ import argparse
 import json
 import sys
 from dataclasses import asdict
+from datetime import datetime, timezone
 from pathlib import Path
 
 _REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -13,7 +14,7 @@ if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
 from src.config.settings import AppConfig, EmbeddingConfig, GenerationConfig
-from src.eval.benchmark_runner import run_benchmark
+from src.eval.benchmark_runner import append_benchmark_progress, run_benchmark
 from src.eval.reporting import save_benchmark_run
 from src.utils.io import write_jsonl
 from src.models.siglip_embedder import SigLIP2EmbeddingModel
@@ -56,7 +57,32 @@ def main() -> None:
         action="store_true",
         help="Disable tqdm progress bar (e.g. for CI logs).",
     )
+    parser.add_argument(
+        "--progress-file",
+        type=Path,
+        default=Path("data/eval/benchmark_progress.txt"),
+        help="Append-only log of question START/DONE (use: tail -f this file).",
+    )
+    parser.add_argument(
+        "--no-progress-file",
+        action="store_true",
+        help="Do not write --progress-file.",
+    )
     args = parser.parse_args()
+
+    progress_path: str | None = None
+    if not args.no_progress_file and args.progress_file is not None:
+        pf = args.progress_file.resolve()
+        pf.parent.mkdir(parents=True, exist_ok=True)
+        progress_path = str(pf)
+        pf.write_text(
+            f"# benchmark run started {datetime.now(timezone.utc).isoformat()}\n",
+            encoding="utf-8",
+        )
+        append_benchmark_progress(
+            progress_path,
+            "[BOOT] loading SigLIP embedder, FAISS index, Qwen VL (this can take several minutes)…",
+        )
 
     cfg = AppConfig.default(repo_root=args.repo_root)
     embedder = SigLIP2EmbeddingModel(
@@ -78,16 +104,27 @@ def main() -> None:
         )
     )
     rag = BaselineRAGAnsweringService(retriever=retriever, generator=generator)
+    if progress_path:
+        append_benchmark_progress(progress_path, "[BOOT] models ready; starting benchmark questions")
 
-    result = run_benchmark(
-        rag_service=rag,
-        benchmark_path=str(args.benchmark_path),
-        top_k_total=args.top_k_total,
-        max_text_items=args.max_text_items,
-        max_frame_items=args.max_frame_items,
-        system_name=args.system_name,
-        show_progress=not args.no_progress,
-    )
+    try:
+        result = run_benchmark(
+            rag_service=rag,
+            benchmark_path=str(args.benchmark_path),
+            top_k_total=args.top_k_total,
+            max_text_items=args.max_text_items,
+            max_frame_items=args.max_frame_items,
+            system_name=args.system_name,
+            show_progress=not args.no_progress,
+            progress_file=progress_path,
+        )
+    except BaseException as exc:
+        if progress_path:
+            append_benchmark_progress(
+                progress_path,
+                f"[RUN_ABORTED] {type(exc).__name__}: {exc}",
+            )
+        raise
     run_dict = asdict(result)
     prediction_rows = run_dict.get("prediction_rows", [])
     if args.predictions_jsonl is not None:
@@ -98,6 +135,11 @@ def main() -> None:
         print(f"\nSaved strict predictions (prediction_v1) to: {args.predictions_jsonl}")
     if args.detail_jsonl is not None:
         print(f"Saved detail per-question rows to: {args.detail_jsonl}")
+    if progress_path:
+        append_benchmark_progress(
+            progress_path,
+            "[RUN_ALL_DONE] wrote predictions and benchmark_run json",
+        )
 
 
 if __name__ == "__main__":
