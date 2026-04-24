@@ -54,11 +54,7 @@ def _embed_items(items: list[IndexedItem], embedder: EmbeddingModel) -> tuple[li
     return ordered_ids, np.vstack(ordered_vectors).astype(np.float32)
 
 
-def build_index(config: AppConfig) -> None:
-    video_ids = discover_video_ids(config.paths)
-    if not video_ids:
-        raise RuntimeError(f"No transcript files found in {config.paths.transcripts_dir}")
-
+def build_index_for_video_ids(config: AppConfig, video_ids: list[str]) -> None:
     all_items: list[IndexedItem] = []
     for video_id in video_ids:
         all_items.extend(
@@ -87,3 +83,10 @@ def build_index(config: AppConfig) -> None:
     store.save(config.paths.faiss_index_path, config.paths.faiss_ids_path)
     logger.info("Wrote metadata: %s", config.paths.metadata_jsonl_path)
     logger.info("Wrote Faiss index: %s", config.paths.faiss_index_path)
+
+
+def build_index(config: AppConfig) -> None:
+    video_ids = discover_video_ids(config.paths)
+    if not video_ids:
+        raise RuntimeError(f"No transcript files found in {config.paths.transcripts_dir}")
+    build_index_for_video_ids(config, video_ids)

@@ -65,11 +65,18 @@ class SigLIP2EmbeddingModel(EmbeddingModel):
                 batch = texts[start:end]
                 encoded = self.processor(
                     text=batch,
-                    padding=True,
+                    padding="max_length",
                     truncation=True,
                     max_length=max_len,
                     return_tensors="pt",
-                ).to(self.device)
+                )
+                # Some processor/tokenizer combinations still return overlong tensors.
+                # Clamp them defensively so retrieval queries never exceed the model limit.
+                if "input_ids" in encoded and encoded["input_ids"].shape[1] > max_len:
+                    for key, value in list(encoded.items()):
+                        if isinstance(value, torch.Tensor) and value.ndim >= 2:
+                            encoded[key] = value[:, :max_len]
+                encoded = encoded.to(self.device)
                 features = self.model.get_text_features(**encoded)
                 output.append(_features_to_numpy(features))
         vectors = np.concatenate(output, axis=0)

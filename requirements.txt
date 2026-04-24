@@ -1,13 +1,23 @@
+# Core ML / embeddings
+torch>=2.4.0
+transformers>=4.51.0
+accelerate>=0.34.0
+numpy>=2.0.0
+faiss-cpu>=1.8.0
+Pillow>=10.4.0
+
+# RAG / generation
+openai>=1.54.0
+
+# Data prep (download, transcribe, extract frames)
 yt-dlp>=2025.1.15
 faster-whisper>=1.1.0
 opencv-python>=4.10.0.84
-numpy>=2.0.0
-tqdm>=4.66.0
-transformers>=4.51.0
-torch>=2.4.0
-Pillow>=10.4.0
-faiss-cpu>=1.8.0
-pyarrow>=17.0.0
-accelerate>=0.34.0
-openai>=1.54.0
+
+# Infrastructure
 modal>=1.4.2
+httpx>=0.27.0
+
+# Misc
+tqdm>=4.66.0
+pyarrow>=17.0.0

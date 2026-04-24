@@ -1,202 +1,224 @@
-# MVP VideoQA Data Pipeline
+# Multimodal Video QA
 
-Minimal data loading + processing layer for a multimodal Video QA project.
-
-This MVP does **only**:
-- download a handful of YouTube videos
-- store per-video metadata as JSON
-- transcribe audio to timestamped JSON segments (faster-whisper)
-- extract frames every 1 second (OpenCV) + store frame metadata as JSON
-- provide a small Python dataloader for timestamp queries
+Agentic multimodal RAG system for answering questions about a video corpus. Retrieves
+timestamped transcript segments and video frames via a SigLIP2 FAISS index, then
+generates answers using Qwen3-VL models served on Modal with vLLM.
 
 ## Setup
 
-Create a virtualenv and install deps:
-
 ```bash
-uv venv .venv
+bash setup.sh
 source .venv/bin/activate
-uv pip install -r requirements.txt
-modal setup
 ```
 
-Assumptions:
-- `ffmpeg` is installed and on your PATH
+Prerequisites: Python 3.14+, `ffmpeg` on PATH.
 
-## Configure URLs
-
-Edit `config.py` and set `YOUTUBE_URLS` to **3–5** YouTube video URLs.
-
-## Run the pipeline
-
-From repo root:
+For Modal GPU infrastructure (vLLM endpoints, remote retrieval):
 
 ```bash
-python -m src.download_videos
-python -m src.transcribe
-python -m src.extract_frames
+bash modal_setup.sh
 ```
 
-Outputs:
-- Videos: `data/raw_videos/`
-- Audio WAVs: `data/audio/`
-- Transcripts: `data/transcripts/<video_id>.json`
-- Frames: `data/frames/<video_id>/*.jpg`
-- Video metadata: `data/metadata/videos/<video_id>.json` and `data/metadata/videos_index.json`
-- Frame metadata: `data/metadata/frames/<video_id>.json`
+## Project Structure
 
-Schema examples:
-- `data/metadata/schema_examples/transcript_schema_example.json`
-- `data/metadata/schema_examples/frames_schema_example.json`
+```
+src/
+  agentic/          # Tool-calling agent loop (ReAct-style)
+    agent.py        # Core agent: tool dispatch, context overflow handling
+    answering.py    # AgenticRAGAnsweringService (wraps agent + retrieval)
+    tools.py        # Tool schemas and dispatch (semantic_search, get_chunks_by_timestamp, etc.)
+    backend.py      # RetrievalBackend protocol
+    modal_backend.py        # Modal-backed retrieval backend
+    benchmark_backend.py    # Benchmark retrieval backend (pre-indexed)
+    mock_backend.py         # Mock backend for testing
+  rag/              # Baseline RAG pipeline
+    answering.py    # BaselineRAGAnsweringService
+    openai_generator.py     # OpenAI-compatible chat generator (vLLM)
+    image_utils.py  # Frame encoding (base64) for multimodal prompts
+    prompts.py      # System prompts
+    schemas.py      # RAGResult, GenerationResult
+    generator_base.py       # Abstract generator interface
+  retrieval/        # Vector search
+    faiss_store.py  # Local FAISS index
+    modal_client.py # Remote Modal retrieval client
+    service.py      # RetrieverService (embedding + search)
+    vector_store.py # Abstract vector store
+    schemas.py      # RetrievalResult, ChunkResult
+  indexing/
+    build.py        # FAISS index builder (text + frame chunks)
+  models/
+    siglip_embedder.py      # SigLIP2 embedding model
+    base.py         # Abstract embedder
+  eval/             # Evaluation framework
+    benchmark_runner.py     # Concurrent benchmark runner (ThreadPoolExecutor)
+    grading.py      # Token F1, exact match, retrieval metrics
+    metrics.py      # Metric computation
+    reporting.py    # JSON/JSONL output formatting
+    prediction_schema.py    # Prediction row schema (v1)
+    schemas.py      # BenchmarkRunResult, AnswerMetrics, RetrievalMetrics
+  benchmark/        # Benchmark data loading
+    io.py           # Load/save benchmark JSON
+    schemas.py      # BenchmarkItem schema
+  config/
+    settings.py     # AppConfig, EmbeddingConfig, GenerationConfig
+  data/
+    loaders.py      # Video/transcript/frame data loaders
+    schemas.py      # Data schemas
+  serving/          # Modal deployment configs
+    modal_vllm_8b.py        # Qwen3-VL-8B-FP8 on L4
+    modal_vllm_30b.py       # Qwen3-VL-30B-A3B-FP8 (MoE) on A100-80GB
+    modal_vllm_32b.py       # Qwen3-VL-32B-FP8 on A100-80GB
+    modal_vllm.py           # Shared vLLM server (legacy)
+    modal_retrieval.py      # Modal retrieval service
+    modal_index_builder.py  # Remote index builder
+  utils/
+    io.py           # File I/O helpers
+    logging.py      # Logging setup
 
-## Use the dataloader
+  # Data prep (historical, depend on deleted config.py / src/utils.py)
+  download_videos.py        # Download YouTube videos via yt-dlp
+  transcribe.py             # Transcribe audio with faster-whisper
+  extract_frames.py         # Extract frames with OpenCV
 
-Example:
+scripts/
+  # Benchmarking
+  run_benchmark.py          # Run baseline RAG benchmark
+  run_agentic_benchmark.py  # Run agentic RAG benchmark
+  llm_judge_pairwise.py     # LLM-as-judge pairwise evaluation
+  grade_predictions.py      # Grade prediction JSONL against gold answers
+  validate_benchmark.py     # Validate benchmark JSON constraints
 
-```python
-from src.dataloader import VideoQADataloader
+  # Index & retrieval
+  build_index.py            # Build local FAISS index
+  query_index.py            # Query the index from CLI
+  answer_question.py        # Answer a single question (baseline RAG)
 
-dl = VideoQADataloader()
-video_id = dl.list_video_ids()[0]
+  # Infrastructure
+  sync_modal_index.py       # Upload FAISS index to Modal volume
+  sync_modal_assets.py      # Upload video data to Modal volume
+  check_modal_stack.py      # Smoke test deployed Modal services
+  test_endpoints.py         # Test vLLM endpoints
+  lookup_transcript.py      # Inspect transcript segments at timestamps
 
-frame = dl.get_frame_at_time(video_id, timestamp=42.0)
-frames = dl.get_n_frames_at_time(video_id, timestamp=42.0, n=3, step_sec=5)
-segments = dl.get_transcript_at_time(video_id, timestamp=42.0, window_sec=10)
+tests/
+  test_agentic_benchmark_backend.py
+  test_agentic_mock_backend.py
+  test_benchmark_io.py
+  test_data_loaders.py
+  test_siglip_embedder.py
 
-print(frame["image_path"])
-print([f["timestamp_sec"] for f in frames])
-print(" ".join(s["text"] for s in segments))
+data/
+  benchmark/                # Benchmark question sets
+    multimodal_benchmark_v2.json    # 100 questions, 10 videos, 5 types
+    smoke_1q.json                   # 1-question smoke test
+    smoke_test_5q.json              # 5-question smoke test
+  eval/                     # Evaluation outputs
+    run1/                   # Qwen2.5-VL-7B results
+    run2/                   # Qwen3-VL model scale comparison (8B/30B/32B)
+      run_a/                # max_model_len=8192 (baselines + invalidated agentic)
+      run_b/                # max_model_len=32768 (agentic + LLM judge)
+  indexes/                  # FAISS index artifacts
+  frames/                   # Extracted video frames
+  transcripts/              # Whisper transcripts
 ```
 
-## Notes
+## Running Evaluations
 
-- Frame lookup uses **nearest timestamp** matching.
-- Transcript lookup returns **all segments overlapping** the requested time window.
-
-## Retrieval scaffold (v1)
-
-New modular scaffold for indexing/retrieval lives under:
-
-- `src/config/`
-- `src/data/`
-- `src/models/`
-- `src/indexing/`
-- `src/retrieval/`
-- `src/benchmark/`
-- `src/eval/`
-- `src/utils/`
-
-The current benchmark setup uses:
-
-- local indexing to build the FAISS artifacts under `data/indexes/default/`
-- a Modal Volume to store those artifacts for remote retrieval
-- a deployed Modal retrieval service for both baseline and agentic evaluation
-- a deployed Modal vLLM service for answer generation and agent tool calling
-
-Build index:
+### 1. Build the index
 
 ```bash
-python3 scripts/build_index.py --device cpu
+python scripts/build_index.py --device cpu
 ```
 
-Query index:
+### 2. Deploy Modal infrastructure
 
 ```bash
-python3 scripts/query_index.py "How does the speaker set up the project?" --top-k 5
+bash modal_setup.sh
 ```
 
-Run baseline multimodal RAG answerer against the shared remote vLLM/Modal model:
+Or deploy individual vLLM servers:
 
 ```bash
-VLLM_BASE_URL=http://localhost:8000/v1 python3 scripts/answer_question.py \
-  "What is computer science?" \
-  --video-id CxGSnA-RTsA \
-  --retrieval-backend modal
+modal deploy src/serving/modal_vllm_8b.py
+modal deploy src/serving/modal_vllm_30b.py
+modal deploy src/serving/modal_vllm_32b.py
 ```
 
-This saves a JSON run artifact under `data/runs/answers/` by default.
-
-Run baseline benchmark:
+### 3. Run baseline benchmark
 
 ```bash
-VLLM_BASE_URL=http://localhost:8000/v1 python3 scripts/run_benchmark.py \
-  --benchmark-path data/benchmark/example_benchmark_v1.jsonl \
-  --retrieval-backend modal
-```
-
-While it runs, you should see a **tqdm progress bar** (one step per benchmark question). Use `--no-progress` for CI or plain logs.
-
-This writes:
-
-- `data/eval/benchmark_run.json` — full run (metrics + per-question debug + embedded `prediction_rows`)
-- `data/eval/predictions_v1.jsonl` — **strict shared format** for grading (`schema_version: prediction_v1`)
-
-Optional verbose per-question JSONL (metrics + debug only):
-
-```bash
-VLLM_BASE_URL=http://localhost:8000/v1 python3 scripts/run_benchmark.py \
-  --benchmark-path data/benchmark/example_benchmark_v1.jsonl \
+python scripts/run_benchmark.py \
+  --benchmark-path data/benchmark/multimodal_benchmark_v2.json \
   --retrieval-backend modal \
-  --detail-jsonl data/eval/benchmark_questions_detail.jsonl
+  --generation-model "Qwen/Qwen3-VL-8B-Instruct-FP8" \
+  --generation-base-url "https://<workspace>--nlp-videoqa-vllm-8b-serve.modal.run/v1" \
+  --output-json data/eval/run/baseline_benchmark_run.json \
+  --predictions-jsonl data/eval/run/baseline_predictions_v1.jsonl \
+  --max-concurrent 4
 ```
 
-Schema for predictions: `data/benchmark/prediction_schema_v1.json`.  
-Helper types and builders: `src/eval/prediction_schema.py` (`build_prediction_row`, `validate_prediction_row`).
-
-Run the agentic benchmark over the same index and benchmark questions:
+### 4. Run agentic benchmark
 
 ```bash
-VLLM_BASE_URL=http://localhost:8000/v1 python3 scripts/run_agentic_benchmark.py \
-  --benchmark-path data/benchmark/example_benchmark_v1.jsonl \
-  --retrieval-backend modal
+python scripts/run_agentic_benchmark.py \
+  --benchmark-path data/benchmark/multimodal_benchmark_v2.json \
+  --retrieval-backend modal \
+  --generation-model "Qwen/Qwen3-VL-8B-Instruct-FP8" \
+  --generation-base-url "https://<workspace>--nlp-videoqa-vllm-8b-serve.modal.run/v1" \
+  --output-json data/eval/run/agentic_benchmark_run.json \
+  --predictions-jsonl data/eval/run/agentic_predictions_v1.jsonl \
+  --max-concurrent 4
 ```
 
-This writes:
+### 5. LLM-as-judge pairwise evaluation
 
-- `data/eval/agentic_benchmark_run.json` - full agentic run (metrics + per-question debug + prediction rows)
-- `data/eval/agentic_predictions_v1.jsonl` - strict shared-format predictions for grading
-
-Serve the shared remote OpenAI-compatible model on Modal:
+Compares baseline vs agentic outputs with randomized A/B positioning:
 
 ```bash
-.venv/bin/modal serve modal_app.py
+python scripts/llm_judge_pairwise.py \
+  --benchmark-path data/benchmark/multimodal_benchmark_v2.json \
+  --baseline-predictions data/eval/run/baseline_predictions_v1.jsonl \
+  --agentic-predictions data/eval/run/agentic_predictions_v1.jsonl \
+  --generation-model "Qwen/Qwen3-VL-8B-Instruct-FP8" \
+  --generation-base-url "https://<workspace>--nlp-videoqa-vllm-8b-serve.modal.run/v1" \
+  --output-json data/eval/run/llm_judge_report.json \
+  --output-jsonl data/eval/run/llm_judge_per_question.jsonl \
+  --seed 42
 ```
 
-Deploy a persistent Modal endpoint:
+### 6. Grade predictions against gold answers
 
 ```bash
-.venv/bin/modal deploy modal_app.py
-```
-
-Upload the local FAISS index into a Modal Volume:
-
-```bash
-.venv/bin/python scripts/sync_modal_index.py \
-  --local-index-dir data/indexes/default \
-  --volume-name nlp-videoqa-index \
-  --remote-index-subdir indexes/default
-```
-
-Deploy the Modal retrieval service that loads the FAISS index from that volume:
-
-```bash
-.venv/bin/modal deploy modal_retrieval_app.py
-```
-
-Smoke test both deployed services:
-
-```bash
-.venv/bin/python scripts/check_modal_stack.py \
-  --generation-base-url https://<your-modal-vllm-url>/v1
-```
-
-Compare any system’s **prediction_v1** JSONL against benchmark ground truth:
-
-```bash
-python3 scripts/grade_predictions.py \
-  --benchmark-path data/benchmark/example_benchmark_v1.jsonl \
-  --predictions-jsonl data/eval/predictions_v1.jsonl \
+python scripts/grade_predictions.py \
+  --benchmark-path data/benchmark/multimodal_benchmark_v2.json \
+  --predictions-jsonl data/eval/run/baseline_predictions_v1.jsonl \
   --system-name baseline_rag
 ```
 
-Use `--no-strict` only if you must grade legacy rows that omit `schema_version`.
+## Data Preparation
+
+These scripts were used to build the initial corpus. They depend on `config.py` and
+`src/utils.py` which have been removed, but are kept for reference.
+
+```bash
+python -m src.download_videos    # Download YouTube videos via yt-dlp
+python -m src.transcribe         # Transcribe audio with faster-whisper
+python -m src.extract_frames     # Extract frames every 1s with OpenCV
+```
+
+The processed dataset is published at [mehta233/videoqa-mvp-data](https://huggingface.co/datasets/mehta233/videoqa-mvp-data)
+on HuggingFace (23k frames, 10 videos).
+
+## Results
+
+See [data/eval/run2/README.md](data/eval/run2/README.md) for the full Qwen3-VL model
+scale comparison (8B / 30B-A3B / 32B), including baseline vs agentic results, LLM judge
+evaluations, and analysis.
+
+**Highlights (Run 2, 32k context):**
+
+| Model | Baseline F1 | Agentic F1 | Delta |
+|-------|------------|------------|-------|
+| 8B    | 0.276      | 0.418      | +51%  |
+| 30B   | 0.279      | 0.358      | +28%  |
+| 32B   | 0.246      | 0.408      | +66%  |

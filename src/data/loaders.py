@@ -7,13 +7,41 @@ from src.data.schemas import FrameItem, IndexedItem, TranscriptChunk
 from src.utils.io import read_json
 
 
+def _fallback_data_root(paths: PathsConfig) -> Path:
+    return paths.repo_root / "hf_data"
+
+
+def _transcript_path_candidates(paths: PathsConfig, video_id: str) -> list[Path]:
+    return [
+        paths.transcripts_dir / f"{video_id}.json",
+        _fallback_data_root(paths) / "transcripts" / f"{video_id}.json",
+    ]
+
+
+def _frame_metadata_candidates(paths: PathsConfig, video_id: str) -> list[Path]:
+    return [
+        paths.frames_metadata_dir / f"{video_id}.json",
+        _fallback_data_root(paths) / "metadata" / "frames" / f"{video_id}.json",
+    ]
+
+
+def _frame_dir_candidates(paths: PathsConfig, video_id: str) -> list[Path]:
+    return [
+        paths.frames_dir / video_id,
+        _fallback_data_root(paths) / "frames" / video_id,
+    ]
+
+
 def discover_video_ids(paths: PathsConfig) -> list[str]:
     """
     Discover video ids from transcript JSON files.
     """
-    if not paths.transcripts_dir.exists():
-        return []
-    return sorted([p.stem for p in paths.transcripts_dir.glob("*.json")])
+    video_ids: set[str] = set()
+    for transcript_dir in [paths.transcripts_dir, _fallback_data_root(paths) / "transcripts"]:
+        if not transcript_dir.exists():
+            continue
+        video_ids.update(p.stem for p in transcript_dir.glob("*.json"))
+    return sorted(video_ids)
 
 
 def load_transcript_chunks_for_video(paths: PathsConfig, video_id: str) -> list[TranscriptChunk]:
@@ -23,8 +51,8 @@ def load_transcript_chunks_for_video(paths: PathsConfig, video_id: str) -> list[
     - File is `data/transcripts/<video_id>.json`
     - Segment records contain text and start/end-like fields.
     """
-    transcript_path = paths.transcripts_dir / f"{video_id}.json"
-    if not transcript_path.exists():
+    transcript_path = next((p for p in _transcript_path_candidates(paths, video_id) if p.exists()), None)
+    if transcript_path is None:
         return []
     payload = read_json(transcript_path)
     segments = payload.get("segments", [])
@@ -55,18 +83,20 @@ def enumerate_frames_for_video(paths: PathsConfig, video_id: str) -> list[FrameI
     """
     def _normalize_frame_path(raw_path: str) -> str:
         p = Path(raw_path)
-        if p.is_absolute():
+        if p.is_absolute() and p.exists():
             return str(p)
-        candidate_1 = (paths.repo_root / raw_path).resolve()
-        if candidate_1.exists():
-            return str(candidate_1)
-        candidate_2 = (paths.repo_root / "data" / raw_path).resolve()
-        if candidate_2.exists():
-            return str(candidate_2)
+        candidates = [
+            (paths.repo_root / raw_path).resolve(),
+            (paths.repo_root / "data" / raw_path).resolve(),
+            (_fallback_data_root(paths) / raw_path).resolve(),
+        ]
+        for candidate in candidates:
+            if candidate.exists():
+                return str(candidate)
         return raw_path
 
-    metadata_path = paths.frames_metadata_dir / f"{video_id}.json"
-    if metadata_path.exists():
+    metadata_path = next((p for p in _frame_metadata_candidates(paths, video_id) if p.exists()), None)
+    if metadata_path is not None:
         payload = read_json(metadata_path)
         out: list[FrameItem] = []
         for idx, frame in enumerate(payload.get("frames", [])):
@@ -86,27 +116,28 @@ def enumerate_frames_for_video(paths: PathsConfig, video_id: str) -> list[FrameI
             )
         return out
 
-    frame_dir = paths.frames_dir / video_id
-    if not frame_dir.exists():
-        return []
-    files = sorted(frame_dir.glob("*.jpg"))
-    fallback: list[FrameItem] = []
-    for idx, file in enumerate(files):
-        # Current pipeline uses millisecond filenames like 0000001000.jpg.
-        try:
-            ts = float(int(file.stem) / 1000.0)
-        except ValueError:
-            ts = float(idx)
-        fallback.append(
-            FrameItem(
-                video_id=video_id,
-                source_id=file.stem,
-                timestamp_start=ts,
-                timestamp_end=ts + 1.0,
-                frame_path=str(file),
+    for frame_dir in _frame_dir_candidates(paths, video_id):
+        if not frame_dir.exists():
+            continue
+        files = sorted(frame_dir.glob("*.jpg"))
+        fallback: list[FrameItem] = []
+        for idx, file in enumerate(files):
+            # Current pipeline uses millisecond filenames like 0000001000.jpg.
+            try:
+                ts = float(int(file.stem) / 1000.0)
+            except ValueError:
+                ts = float(idx)
+            fallback.append(
+                FrameItem(
+                    video_id=video_id,
+                    source_id=file.stem,
+                    timestamp_start=ts,
+                    timestamp_end=ts + 1.0,
+                    frame_path=str(file),
+                )
             )
-        )
-    return fallback
+        return fallback
+    return []
 
 
 def sample_frames_at_fps(frames: list[FrameItem], target_fps: float = 1.0) -> list[FrameItem]:

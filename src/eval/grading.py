@@ -16,6 +16,12 @@ def _interval_overlap(a0: float, a1: float, b0: float, b1: float) -> bool:
     return (a0 < b1) and (b0 < a1)
 
 
+def _normalize_modality(modality: str) -> str:
+    if modality == "image":
+        return "frame"
+    return modality
+
+
 def _retrieval_metrics_from_prediction(
     benchmark_gold: list[dict[str, Any]],
     predicted_items: list[dict[str, Any]],
@@ -29,8 +35,9 @@ def _retrieval_metrics_from_prediction(
         for item in predicted_items:
             if str(item.get("video_id", "")) != str(gold["video_id"]):
                 continue
-            gold_mod = str(gold["modality"])
-            if gold_mod != "mixed" and str(item.get("modality", "")) != gold_mod:
+            gold_mod = _normalize_modality(str(gold["modality"]))
+            item_mod = _normalize_modality(str(item.get("modality", "")))
+            if gold_mod != "mixed" and item_mod != gold_mod:
                 continue
             if _interval_overlap(
                 float(item.get("timestamp_start", 0.0)),

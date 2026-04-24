@@ -5,6 +5,10 @@ __pycache__/
 *$py.class
 .Python
 
+# Secrets
+.env
+.env.*
+
 # macOS
 .DS_Store
 
@@ -27,6 +31,12 @@ __pycache__/
 
 # Generated evaluation outputs
 /data/eval/*
+
+# HuggingFace dataset clone (4.6GB, use HF hub instead)
+/hf_data/
+
+# FAISS index artifacts (rebuild with scripts/build_index.py)
+/data/indexes/
 
 # Obsolete prototype scaffold replaced by src/agentic
 /agentic_retrieval/

@@ -42,11 +42,19 @@ def _interval_overlap(a0: float, a1: float, b0: float, b1: float) -> bool:
     return (a0 < b1) and (b0 < a1)
 
 
+def _normalize_modality(modality: str) -> str:
+    if modality == "image":
+        return "frame"
+    return modality
+
+
 def _gold_hit(run: RAGRunResult, gold: GoldEvidence) -> bool:
     for item in run.retrieved_items:
         if item.video_id != gold.video_id:
             continue
-        if gold.modality != "mixed" and item.modality != gold.modality:
+        gold_modality = _normalize_modality(gold.modality)
+        item_modality = _normalize_modality(item.modality)
+        if gold_modality != "mixed" and item_modality != gold_modality:
             continue
         if _interval_overlap(
             item.timestamp_start,

@@ -1,13 +1,20 @@
 from __future__ import annotations
 
+# ruff: noqa: E402
 import argparse
 import json
+import sys
 from dataclasses import asdict
 from pathlib import Path
+
+_REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
 
 from src.agentic.answering import AgenticRAGAnsweringService
 from src.agentic.modal_backend import ModalAgenticBackend
 from src.config.settings import AppConfig, EmbeddingConfig, GenerationConfig
+from src.rag.image_utils import set_frame_roots
 from src.eval.benchmark_runner import run_benchmark
 from src.eval.reporting import save_benchmark_run
 from src.models.siglip_embedder import SigLIP2EmbeddingModel
@@ -22,7 +29,7 @@ def main() -> None:
     parser.add_argument(
         "--benchmark-path",
         type=Path,
-        default=Path("data/benchmark/example_benchmark_v1.jsonl"),
+        default=Path("data/benchmark/multimodal_benchmark_v2.json"),
     )
     parser.add_argument("--repo-root", type=Path, default=Path(__file__).resolve().parents[1])
     parser.add_argument("--top-k-total", type=int, default=8)
@@ -34,7 +41,7 @@ def main() -> None:
     parser.add_argument("--modal-retrieval-app-name", type=str, default="nlp-videoqa-retrieval")
     parser.add_argument("--modal-retrieval-class-name", type=str, default="RetrievalIndex")
     parser.add_argument("--modal-index-subdir", type=str, default="indexes/default")
-    parser.add_argument("--generation-model", type=str, default="Qwen/Qwen2.5-7B-Instruct")
+    parser.add_argument("--generation-model", type=str, default="Qwen/Qwen2.5-VL-7B-Instruct")
     parser.add_argument("--generation-base-url", type=str, default=None)
     parser.add_argument("--generation-api-key", type=str, default=None)
     parser.add_argument("--device", type=str, default="cpu")
@@ -52,9 +59,19 @@ def main() -> None:
         default=None,
         help="Optional verbose per-question JSONL (metrics + debug). Omit to skip.",
     )
+    parser.add_argument(
+        "--max-concurrent",
+        type=int,
+        default=1,
+        help="Number of questions to process concurrently (default: 1 = sequential).",
+    )
     args = parser.parse_args()
 
     cfg = AppConfig.default(repo_root=args.repo_root)
+    set_frame_roots([
+        str(args.repo_root / "hf_data" / "frames"),
+        str(cfg.paths.frames_dir),
+    ])
     if args.retrieval_backend == "local":
         embedder = SigLIP2EmbeddingModel(
             EmbeddingConfig(model_name=args.embedding_model, device=args.device, batch_size=16, normalize=True)
@@ -100,6 +117,7 @@ def main() -> None:
         max_text_items=args.max_text_items,
         max_frame_items=args.max_frame_items,
         system_name=args.system_name,
+        max_concurrent=args.max_concurrent,
     )
     run_dict = asdict(result)
     prediction_rows = run_dict.get("prediction_rows", [])

@@ -4,20 +4,20 @@ import json
 
 import modal
 
-MODEL_NAME = "Qwen/Qwen2.5-VL-7B-Instruct"
+MODEL_NAME = "Qwen/Qwen3-VL-8B-Instruct-FP8"
 GPU = "L4"
-MAX_MODEL_LEN = 8192
+MAX_MODEL_LEN = 32768
 MAX_NUM_SEQS = 4
 MAX_IMAGES_PER_PROMPT = 8
 PORT = 8000
-APP_NAME = "nlp-videoqa-vllm"
+APP_NAME = "nlp-videoqa-vllm-8b"
 HF_SECRET_NAME = "huggingface-secret"
 
 image = (
     modal.Image.from_registry("nvidia/cuda:12.9.0-devel-ubuntu22.04", add_python="3.12")
     .entrypoint([])
     .uv_pip_install(
-        "vllm==0.19.0",
+        "vllm==0.19.1",
         "huggingface_hub==0.36.0",
         "hf_transfer>=0.1.9",
     )
@@ -48,7 +48,7 @@ app = modal.App(APP_NAME)
     scaledown_window=900,
     timeout=30 * 60,
 )
-@modal.concurrent(target_inputs=2, max_inputs=4)
+@modal.concurrent(target_inputs=4, max_inputs=8)
 @modal.web_server(port=PORT, startup_timeout=600)
 def serve():
     import subprocess

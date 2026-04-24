@@ -176,10 +176,16 @@ class AgenticRAGAnsweringService:
             max_frame_items=request.retrieval_policy.max_frame_items,
             dedupe_seconds=request.retrieval_policy.dedupe_seconds,
         )
+        initial_frame_paths = [
+            item.frame_path
+            for item in initial_items
+            if item.modality == "frame" and item.frame_path
+        ]
         agent_result = run_agent(
             question=request.question,
             video_id=request.video_id,
             initial_context=_format_initial_context(initial_items),
+            initial_frame_paths=initial_frame_paths,
             backend=self.backend,
             client=self.client,
             model=self.generation_config.model_name,
@@ -210,6 +216,10 @@ class AgenticRAGAnsweringService:
                 metadata={
                     "agent_total_tool_calls": agent_result.total_tool_calls,
                     "agent_stopped_reason": agent_result.stopped_reason,
+                    "total_prompt_tokens": agent_result.total_prompt_tokens,
+                    "total_completion_tokens": agent_result.total_completion_tokens,
+                    "num_llm_calls": agent_result.num_llm_calls,
+                    "num_frames_sent": len(initial_frame_paths),
                 },
             ),
             debug_info={

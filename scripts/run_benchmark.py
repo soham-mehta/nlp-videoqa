@@ -15,6 +15,7 @@ if str(_REPO_ROOT) not in sys.path:
 
 from src.config.settings import AppConfig, EmbeddingConfig, GenerationConfig
 from src.eval.benchmark_runner import append_benchmark_progress, run_benchmark
+from src.rag.image_utils import set_frame_roots
 from src.eval.reporting import save_benchmark_run
 from src.utils.io import write_jsonl
 from src.models.siglip_embedder import SigLIP2EmbeddingModel
@@ -30,7 +31,7 @@ def main() -> None:
     parser.add_argument(
         "--benchmark-path",
         type=Path,
-        default=Path("data/benchmark/example_benchmark_v1.jsonl"),
+        default=Path("data/benchmark/multimodal_benchmark_v2.json"),
     )
     parser.add_argument("--repo-root", type=Path, default=Path(__file__).resolve().parents[1])
     parser.add_argument("--top-k-total", type=int, default=8)
@@ -41,7 +42,7 @@ def main() -> None:
     parser.add_argument("--modal-retrieval-app-name", type=str, default="nlp-videoqa-retrieval")
     parser.add_argument("--modal-retrieval-class-name", type=str, default="RetrievalIndex")
     parser.add_argument("--modal-index-subdir", type=str, default="indexes/default")
-    parser.add_argument("--generation-model", type=str, default="Qwen/Qwen2.5-7B-Instruct")
+    parser.add_argument("--generation-model", type=str, default="Qwen/Qwen2.5-VL-7B-Instruct")
     parser.add_argument("--generation-base-url", type=str, default=None)
     parser.add_argument("--generation-api-key", type=str, default=None)
     parser.add_argument("--device", type=str, default="cpu")
@@ -75,6 +76,12 @@ def main() -> None:
         action="store_true",
         help="Do not write --progress-file.",
     )
+    parser.add_argument(
+        "--max-concurrent",
+        type=int,
+        default=1,
+        help="Number of questions to process concurrently (default: 1 = sequential).",
+    )
     args = parser.parse_args()
 
     progress_path: str | None = None
@@ -92,6 +99,10 @@ def main() -> None:
         )
 
     cfg = AppConfig.default(repo_root=args.repo_root)
+    set_frame_roots([
+        str(args.repo_root / "hf_data" / "frames"),
+        str(cfg.paths.frames_dir),
+    ])
     if args.retrieval_backend == "local":
         embedder = SigLIP2EmbeddingModel(
             EmbeddingConfig(model_name=args.embedding_model, device=args.device, batch_size=16, normalize=True)
@@ -135,6 +146,7 @@ def main() -> None:
             system_name=args.system_name,
             show_progress=not args.no_progress,
             progress_file=progress_path,
+            max_concurrent=args.max_concurrent,
         )
     except BaseException as exc:
         if progress_path:

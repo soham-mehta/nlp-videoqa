@@ -1,0 +1,221 @@
+[
+  {
+    "video_id": "CxGSnA-RTsA",
+    "video_title": "COMPUTER SCIENCE explained in 17 Minutes",
+    "items": [
+      {
+        "question_id": "cx_f_001",
+        "question_type": "factual",
+        "question": "At the moment the narrator first introduces hexadecimal as 'more readable than binary' (around 0:50), what specific hexadecimal value is overlaid on the white car in the comedic clip, and what subtitle appears with it?",
+        "ideal_answer": "The hex value '0x62' is overlaid on the white VW car, and the on-screen subtitle reads 'But I like this.'",
+        "answer_support": "The frame at 50s shows the '0x62' overlay on the white Volkswagen and the subtitle 'But I like this.', matching the narration at ~47-52s about hexadecimal being a more readable format.",
+        "evidence_modalities_needed": [
+          "text",
+          "image"
+        ],
+        "gold_evidence": [
+          {
+            "modality": "text",
+            "timestamp_start": 47.7,
+            "timestamp_end": 54.82,
+            "transcript_chunk_ids": [
+              "seg_0012",
+              "seg_0013"
+            ],
+            "frame_ids": [],
+            "rationale": "Narration introduces hexadecimal as 'more readable than binary' and the '0x' prefix; the answer text comes from the subtitle and overlay paired with this narration."
+          },
+          {
+            "modality": "image",
+            "timestamp_start": 49.0,
+            "timestamp_end": 52.0,
+            "transcript_chunk_ids": [],
+            "frame_ids": [
+              "frames/CxGSnA-RTsA/0000050000.jpg"
+            ],
+            "rationale": "The frame at ~50s shows '0x62' overlaid on the white VW and the subtitle 'But I like this.'"
+          }
+        ],
+        "why_this_is_hard": "The answer requires identifying both a textual overlay value and a subtitle that are not stated by the narrator; you must look at the actual frame.",
+        "why_simple_transcript_rag_should_fail": "The transcript only mentions '0x' as the hex prefix; it never says '0x62' nor mentions any car or the subtitle, so transcript-only retrieval cannot recover the specific values."
+      }
+    ]
+  },
+  {
+    "video_id": "EfKLrSxA_H8",
+    "video_title": "Live Coding with Yocto Project #1: download and first build",
+    "items": [
+      {
+        "question_id": "ef_f_001",
+        "question_type": "factual",
+        "question": "After the speaker has cloned Poky and runs git tag from inside the poky directory (around 6:40), what is the most recent yocto-prefixed tag visible at the bottom of the on-screen listing?",
+        "ideal_answer": "yocto-1.5.1 is the last yocto tag visible at the bottom of the on-screen tag listing.",
+        "answer_support": "Frame at 400s shows a `git tag` listing in `ubuntu@ip-172-31-33-43:~/poky$` whose final visible line is 'yocto-1.5.1'. The narrator simultaneously claims he is on the latest 2.6.2 release, but only 1.4.x and 1.5.x tags are visible in this scroll position.",
+        "evidence_modalities_needed": [
+          "text",
+          "image"
+        ],
+        "gold_evidence": [
+          {
+            "modality": "text",
+            "timestamp_start": 388.81,
+            "timestamp_end": 411.81,
+            "transcript_chunk_ids": [
+              "seg_0037",
+              "seg_0038",
+              "seg_0039",
+              "seg_0040"
+            ],
+            "frame_ids": [],
+            "rationale": "Speaker says: 'we have cloned into pocky and we will have a small look at it. These are all the released tags... we will check out Yachto 2.6.2.'"
+          },
+          {
+            "modality": "image",
+            "timestamp_start": 399.0,
+            "timestamp_end": 405.0,
+            "transcript_chunk_ids": [],
+            "frame_ids": [
+              "frames/EfKLrSxA_H8/0000400000.jpg"
+            ],
+            "rationale": "Frame shows the git tag listing whose visible bottom is yocto-1.5.1."
+          }
+        ],
+        "why_this_is_hard": "Narration says 'latest release, which is 2.6.2' so transcript suggests 2.6.2; but the actual visible listing only shows 1.4.x/1.5.x tags. The right answer requires reading the screen.",
+        "why_simple_transcript_rag_should_fail": "Transcript-only RAG would answer 2.6.2 because that's what the narrator says, but the question asks what is visible on the screen, not what the speaker claims."
+      }
+    ]
+  },
+  {
+    "video_id": "EgpLj86ZHFQ",
+    "video_title": "Please Learn How To Write Tests in Python\u2026 - Pytest Tutorial",
+    "items": [
+      {
+        "question_id": "eg_f_001",
+        "question_type": "factual",
+        "question": "When the speaker runs his very first test_get_weather example successfully in pytest (around 5:00), what specific Python and pytest versions are reported in the test session header on screen?",
+        "ideal_answer": "Python 3.12.6 and pytest-8.3.4 (platform win32, with pluggy-1.5.0; plugins listed are anyio-4.6.0 and mock-3.14.0).",
+        "answer_support": "Frame at 300s shows the literal pytest test session header containing 'platform win32 -- Python 3.12.6, pytest-8.3.4, pluggy-1.5.0' and 'plugins: anyio-4.6.0, mock-3.14.0'.",
+        "evidence_modalities_needed": [
+          "text",
+          "image"
+        ],
+        "gold_evidence": [
+          {
+            "modality": "text",
+            "timestamp_start": 287.0,
+            "timestamp_end": 305.0,
+            "transcript_chunk_ids": [
+              "seg_0054",
+              "seg_0055",
+              "seg_0056"
+            ],
+            "frame_ids": [],
+            "rationale": "Speaker says 'we type pytest, and then the name of our test script... and you can see that we had one test case that passed in this amount of time.' but does not state the versions."
+          },
+          {
+            "modality": "image",
+            "timestamp_start": 298.0,
+            "timestamp_end": 305.0,
+            "transcript_chunk_ids": [],
+            "frame_ids": [
+              "frames/EgpLj86ZHFQ/0000300000.jpg"
+            ],
+            "rationale": "Frame contains the literal version strings from the test session header."
+          }
+        ],
+        "why_this_is_hard": "Versions are only on screen and the speaker never says them aloud.",
+        "why_simple_transcript_rag_should_fail": "Transcript has no mention of '3.12.6', '8.3.4', 'pluggy', 'anyio', or 'mock-3.14.0'."
+      }
+    ]
+  },
+  {
+    "video_id": "KZeIEiBrT_w",
+    "video_title": "The Strange Math That Predicts (Almost) Anything",
+    "items": [
+      {
+        "question_id": "kz_f_001",
+        "question_type": "factual",
+        "question": "On the on-screen Markov chain diagram for vowels and consonants, what transition probability is shown on the arrow that loops from the vowel state back to itself, and what is the corresponding vowel-to-consonant probability the speaker derives?",
+        "ideal_answer": "The vowel-to-vowel self-loop is labeled with a transition probability of about 13% (derived as 0.06 / 0.43), and the vowel-to-consonant transition is therefore 1 - 0.13 = 87%.",
+        "answer_support": "Narration at 407.36-442.88s explicitly walks through dividing 0.06 by 0.43 to get ~13%, and concludes that going to a consonant must be 87%; the on-screen diagram around 420s shows the V state with a self-loop and an arrow to C.",
+        "evidence_modalities_needed": [
+          "text",
+          "image"
+        ],
+        "gold_evidence": [
+          {
+            "modality": "text",
+            "timestamp_start": 407.36,
+            "timestamp_end": 442.88,
+            "transcript_chunk_ids": [
+              "seg_0070",
+              "seg_0071",
+              "seg_0072",
+              "seg_0073",
+              "seg_0074",
+              "seg_0075"
+            ],
+            "frame_ids": [],
+            "rationale": "Narration explicitly states the 13% transition probability and the 87% complement."
+          },
+          {
+            "modality": "image",
+            "timestamp_start": 415.0,
+            "timestamp_end": 440.0,
+            "transcript_chunk_ids": [],
+            "frame_ids": [
+              "frames/KZeIEiBrT_w/0000420000.jpg"
+            ],
+            "rationale": "Frame shows the V (43%) and C states with the self-loop arrow being constructed and the pair frequencies (VV 6%, CC 19%, VC 37.5%, CV 37.5%) at the top."
+          }
+        ],
+        "why_this_is_hard": "Requires recognising that the diagram and the 0.06/0.43 arithmetic in narration refer to the same self-loop arrow.",
+        "why_simple_transcript_rag_should_fail": "Top-k transcript retrieval may return only the 'about 13%' line without the visual confirmation that the 13% is on the V->V loop and that 87% is on the V->C arrow."
+      }
+    ]
+  },
+  {
+    "video_id": "Z_c4byLrNBU",
+    "video_title": "Data Structure and Algorithm Patterns for LeetCode Interviews \u2013 Tutorial",
+    "items": [
+      {
+        "question_id": "zc_f_001",
+        "question_type": "factual",
+        "question": "On the AlgoMonster 'Step 2: Implement the Solution' panel for Valid Palindrome (around 25:00), what value does the on-screen `is_palindrome` function return as soon as the lowercased characters at the two pointers do NOT match, and on which line of the visible code does that happen?",
+        "ideal_answer": "It returns `False` on the line `return False`, which is inside the `if s[l].lower() != s[r].lower(): # ignore case` block (line 9 in the visible code panel).",
+        "answer_support": "Frame at 1500s shows the full Python panel with line 8 `if s[l].lower() != s[r].lower(): # ignore case` and line 9 `return False`. Narration at 1460-1467s says 'If they're not equal, we can immediately return false. Because that means the string isn't a palindrome.'",
+        "evidence_modalities_needed": [
+          "text",
+          "image"
+        ],
+        "gold_evidence": [
+          {
+            "modality": "image",
+            "timestamp_start": 1495.0,
+            "timestamp_end": 1510.0,
+            "transcript_chunk_ids": [],
+            "frame_ids": [
+              "frames/Z_c4byLrNBU/0001500000.jpg"
+            ],
+            "rationale": "The frame shows the exact code panel with the if-comparison and the return False statement."
+          },
+          {
+            "modality": "text",
+            "timestamp_start": 1453.86,
+            "timestamp_end": 1474.18,
+            "transcript_chunk_ids": [
+              "seg_0223",
+              "seg_0224",
+              "seg_0225",
+              "seg_0226"
+            ],
+            "frame_ids": [],
+            "rationale": "Narration confirms the early-return-on-mismatch behavior."
+          }
+        ],
+        "why_this_is_hard": "The line and exact return value are only visible on screen; the transcript paraphrases without showing the code.",
+        "why_simple_transcript_rag_should_fail": "Transcript-only retrieval would not surface the line position or the inline comment '# ignore case'."
+      }
+    ]
+  }
+]

@@ -1,0 +1,44 @@
+[
+  {
+    "video_id": "CxGSnA-RTsA",
+    "video_title": "COMPUTER SCIENCE explained in 17 Minutes",
+    "items": [
+      {
+        "question_id": "cx_f_001",
+        "question_type": "factual",
+        "question": "At the moment the narrator first introduces hexadecimal as 'more readable than binary' (around 0:50), what specific hexadecimal value is overlaid on the white car in the comedic clip, and what subtitle appears with it?",
+        "ideal_answer": "The hex value '0x62' is overlaid on the white VW car, and the on-screen subtitle reads 'But I like this.'",
+        "answer_support": "The frame at 50s shows the '0x62' overlay on the white Volkswagen and the subtitle 'But I like this.', matching the narration at ~47-52s about hexadecimal being a more readable format.",
+        "evidence_modalities_needed": [
+          "text",
+          "image"
+        ],
+        "gold_evidence": [
+          {
+            "modality": "text",
+            "timestamp_start": 47.7,
+            "timestamp_end": 54.82,
+            "transcript_chunk_ids": [
+              "seg_0012",
+              "seg_0013"
+            ],
+            "frame_ids": [],
+            "rationale": "Narration introduces hexadecimal as 'more readable than binary' and the '0x' prefix; the answer text comes from the subtitle and overlay paired with this narration."
+          },
+          {
+            "modality": "image",
+            "timestamp_start": 49.0,
+            "timestamp_end": 52.0,
+            "transcript_chunk_ids": [],
+            "frame_ids": [
+              "frames/CxGSnA-RTsA/0000050000.jpg"
+            ],
+            "rationale": "The frame at ~50s shows '0x62' overlaid on the white VW and the subtitle 'But I like this.'"
+          }
+        ],
+        "why_this_is_hard": "The answer requires identifying both a textual overlay value and a subtitle that are not stated by the narrator; you must look at the actual frame.",
+        "why_simple_transcript_rag_should_fail": "The transcript only mentions '0x' as the hex prefix; it never says '0x62' nor mentions any car or the subtitle, so transcript-only retrieval cannot recover the specific values."
+      }
+    ]
+  }
+]

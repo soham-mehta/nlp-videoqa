@@ -57,7 +57,7 @@ class RetrievalPolicyConfig:
 
 @dataclass(frozen=True)
 class GenerationConfig:
-    model_name: str = "Qwen/Qwen2.5-7B-Instruct"
+    model_name: str = "Qwen/Qwen2.5-VL-7B-Instruct"
     device: str = "cpu"
     max_new_tokens: int = 256
     temperature: float = 0.2

@@ -23,3 +23,4 @@ class BenchmarkItem:
     gold_answer: str
     question_type: QuestionType
     gold_evidence: list[GoldEvidence] = field(default_factory=list)
+    question_type_raw: str | None = None
