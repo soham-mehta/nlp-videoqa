@@ -40,3 +40,5 @@ __pycache__/
 
 # Obsolete prototype scaffold replaced by src/agentic
 /agentic_retrieval/
+
+/report/**
