@@ -1,0 +1,7 @@
+metric,baseline,agentic
+Judge win rate,0.64,0.3
+Judge mean score,3.91,2.98
+Token F1,0.2962268444499554,0.2927691968638009
+Top-k hit,0.44,0.34
+Evidence overlap hit,0.44,0.34
+Evidence recall proxy,0.295,0.2175
