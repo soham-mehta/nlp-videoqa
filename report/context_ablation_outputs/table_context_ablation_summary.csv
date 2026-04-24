@@ -1,0 +1,3 @@
+run,token_f1,top_k_hit,evidence_overlap_hit,evidence_recall_proxy,mean_total_tokens,mean_llm_calls,mean_tool_calls,dominant_stop_reason
+Run A (lower context),0.12415969329302205,0.63,0.63,0.445,10122.49,2.9,4.51,context_overflow
+Run B (extended context),0.3512402655527244,0.58,0.58,0.39,8701.54,2.84,2.39,final_answer

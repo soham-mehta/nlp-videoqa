@@ -1,0 +1,58 @@
+{
+  "num_questions": 100,
+  "wins": {
+    "baseline": 38,
+    "agentic": 56,
+    "tie": 5,
+    "parse_error": 1
+  },
+  "win_rate_baseline": 0.38,
+  "win_rate_agentic": 0.56,
+  "tie_rate": 0.05,
+  "mean_score_baseline": 3.09,
+  "mean_score_agentic": 3.76,
+  "per_question_type": {
+    "cross_modal": {
+      "count": 20,
+      "baseline_wins": 7,
+      "agentic_wins": 12,
+      "ties": 1,
+      "mean_score_baseline": 2.95,
+      "mean_score_agentic": 3.95
+    },
+    "factual": {
+      "count": 20,
+      "baseline_wins": 7,
+      "agentic_wins": 10,
+      "ties": 2,
+      "mean_score_baseline": 3.05,
+      "mean_score_agentic": 3.8
+    },
+    "sequential": {
+      "count": 20,
+      "baseline_wins": 10,
+      "agentic_wins": 8,
+      "ties": 2,
+      "mean_score_baseline": 3.5,
+      "mean_score_agentic": 3.3
+    },
+    "summary": {
+      "count": 20,
+      "baseline_wins": 5,
+      "agentic_wins": 15,
+      "ties": 0,
+      "mean_score_baseline": 2.65,
+      "mean_score_agentic": 4.15
+    },
+    "temporal": {
+      "count": 20,
+      "baseline_wins": 9,
+      "agentic_wins": 11,
+      "ties": 0,
+      "mean_score_baseline": 3.3,
+      "mean_score_agentic": 3.6
+    }
+  },
+  "judge_model": "Qwen/Qwen3-VL-8B-Instruct-FP8",
+  "seed": 42
+}

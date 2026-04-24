@@ -1,0 +1,4 @@
+model,mean_judge_score,mean_tool_calls,mean_total_tokens,total_tool_calls
+8b,3.76,2.53,12974.09,253
+30b,3.6,6.24,30835.45,624
+32b,3.45,5.13,23926.81,513
