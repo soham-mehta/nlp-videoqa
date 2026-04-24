@@ -1,9 +1,16 @@
 from __future__ import annotations
 
+# ruff: noqa: E402
+# Repo root must be on sys.path before `src` imports (script may be run without PYTHONPATH=.).
 import argparse
 import json
+import sys
 from dataclasses import asdict
 from pathlib import Path
+
+_REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
 
 from src.config.settings import AppConfig, EmbeddingConfig, GenerationConfig
 from src.eval.benchmark_runner import run_benchmark
@@ -44,6 +51,11 @@ def main() -> None:
         default=None,
         help="Optional verbose per-question JSONL (metrics + debug). Omit to skip.",
     )
+    parser.add_argument(
+        "--no-progress",
+        action="store_true",
+        help="Disable tqdm progress bar (e.g. for CI logs).",
+    )
     args = parser.parse_args()
 
     cfg = AppConfig.default(repo_root=args.repo_root)
@@ -74,6 +86,7 @@ def main() -> None:
         max_text_items=args.max_text_items,
         max_frame_items=args.max_frame_items,
         system_name=args.system_name,
+        show_progress=not args.no_progress,
     )
     run_dict = asdict(result)
     prediction_rows = run_dict.get("prediction_rows", [])

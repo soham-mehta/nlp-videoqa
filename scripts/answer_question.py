@@ -1,10 +1,16 @@
 from __future__ import annotations
 
+# ruff: noqa: E402
 import argparse
 import json
+import sys
 from datetime import datetime
 from dataclasses import asdict
 from pathlib import Path
+
+_REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
 
 from src.config.settings import AppConfig, EmbeddingConfig, GenerationConfig
 from src.eval.reporting import save_answer_run

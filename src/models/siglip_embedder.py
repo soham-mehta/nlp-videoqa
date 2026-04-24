@@ -49,14 +49,27 @@ class SigLIP2EmbeddingModel(EmbeddingModel):
         for i in range(0, n, bs):
             yield i, min(i + bs, n)
 
+    def _max_text_length(self) -> int:
+        cfg = getattr(self.model.config, "text_config", None)
+        if cfg is not None and getattr(cfg, "max_position_embeddings", None):
+            return int(cfg.max_position_embeddings)
+        return 64
+
     def embed_texts(self, texts: list[str]) -> np.ndarray:
         if not texts:
             return np.zeros((0, 0), dtype=np.float32)
+        max_len = self._max_text_length()
         output: list[np.ndarray] = []
         with torch.no_grad():
             for start, end in self._batch_indices(len(texts)):
                 batch = texts[start:end]
-                encoded = self.processor(text=batch, padding=True, return_tensors="pt").to(self.device)
+                encoded = self.processor(
+                    text=batch,
+                    padding=True,
+                    truncation=True,
+                    max_length=max_len,
+                    return_tensors="pt",
+                ).to(self.device)
                 features = self.model.get_text_features(**encoded)
                 output.append(_features_to_numpy(features))
         vectors = np.concatenate(output, axis=0)

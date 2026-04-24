@@ -88,19 +88,21 @@ New modular scaffold for indexing/retrieval lives under:
 Build index:
 
 ```bash
-python scripts/build_index.py --device cpu
+python3 scripts/build_index.py --device cpu
 ```
 
 Query index:
 
 ```bash
-python scripts/query_index.py "How does the speaker set up the project?" --top-k 5
+python3 scripts/query_index.py "How does the speaker set up the project?" --top-k 5
 ```
+
+Scripts under `scripts/` add the repo root to `sys.path`, so you do **not** need `PYTHONPATH=.` for those entrypoints.
 
 Run baseline multimodal RAG answerer (retrieval + Qwen2.5-VL generation):
 
 ```bash
-KMP_DUPLICATE_LIB_OK=TRUE PYTHONPATH=. python3 scripts/answer_question.py "What is computer science?" --video-id CxGSnA-RTsA
+KMP_DUPLICATE_LIB_OK=TRUE python3 scripts/answer_question.py "What is computer science?" --video-id CxGSnA-RTsA
 ```
 
 This saves a JSON run artifact under `data/runs/answers/` by default.
@@ -108,8 +110,10 @@ This saves a JSON run artifact under `data/runs/answers/` by default.
 Run benchmark:
 
 ```bash
-KMP_DUPLICATE_LIB_OK=TRUE PYTHONPATH=. python3 scripts/run_benchmark.py --benchmark-path data/benchmark/example_benchmark_v1.jsonl
+KMP_DUPLICATE_LIB_OK=TRUE python3 scripts/run_benchmark.py --benchmark-path data/benchmark/example_benchmark_v1.jsonl
 ```
+
+While it runs, you should see a **tqdm progress bar** (one step per benchmark question). Use `--no-progress` for CI or plain logs.
 
 This writes:
 
@@ -119,7 +123,7 @@ This writes:
 Optional verbose per-question JSONL (metrics + debug only):
 
 ```bash
-KMP_DUPLICATE_LIB_OK=TRUE PYTHONPATH=. python3 scripts/run_benchmark.py \
+KMP_DUPLICATE_LIB_OK=TRUE python3 scripts/run_benchmark.py \
   --benchmark-path data/benchmark/example_benchmark_v1.jsonl \
   --detail-jsonl data/eval/benchmark_questions_detail.jsonl
 ```
@@ -130,7 +134,7 @@ Helper types and builders: `src/eval/prediction_schema.py` (`build_prediction_ro
 Compare any system’s **prediction_v1** JSONL against benchmark ground truth:
 
 ```bash
-PYTHONPATH=. python3 scripts/grade_predictions.py \
+python3 scripts/grade_predictions.py \
   --benchmark-path data/benchmark/example_benchmark_v1.jsonl \
   --predictions-jsonl data/eval/predictions_v1.jsonl \
   --system-name baseline_rag

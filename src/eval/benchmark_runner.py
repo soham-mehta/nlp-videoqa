@@ -5,6 +5,8 @@ from dataclasses import asdict
 from statistics import mean
 from typing import Any
 
+from tqdm import tqdm
+
 from src.benchmark.io import load_benchmark_items
 from src.eval.metrics import answer_metrics, retrieval_metrics
 from src.eval.prediction_schema import build_prediction_row
@@ -47,6 +49,7 @@ def run_benchmark(
     max_text_items: int = 4,
     max_frame_items: int = 4,
     system_name: str = "baseline_rag",
+    show_progress: bool = True,
 ) -> BenchmarkRunResult:
     items = load_benchmark_items(benchmark_path)
     run_id = str(uuid.uuid4())
@@ -55,7 +58,17 @@ def run_benchmark(
     retrieval_scores: list[RetrievalMetrics] = []
     answer_scores: list[AnswerMetrics] = []
 
-    for item in items:
+    iterator = tqdm(
+        items,
+        desc="Benchmark",
+        unit="question",
+        disable=not show_progress,
+        leave=True,
+        dynamic_ncols=True,
+    )
+    for item in iterator:
+        if show_progress:
+            iterator.set_postfix_str(item.question_id[:40], refresh=False)
         request = AnswerRequest(
             question=item.question,
             video_id=item.video_id,
