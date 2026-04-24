@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+import os
+from dataclasses import dataclass, field
 from pathlib import Path
 
 
@@ -56,11 +57,14 @@ class RetrievalPolicyConfig:
 
 @dataclass(frozen=True)
 class GenerationConfig:
-    model_name: str = "Qwen/Qwen2.5-VL-3B-Instruct"
+    model_name: str = "Qwen/Qwen2.5-7B-Instruct"
     device: str = "cpu"
     max_new_tokens: int = 256
     temperature: float = 0.2
     do_sample: bool = False
+    base_url: str = field(default_factory=lambda: os.environ.get("VLLM_BASE_URL", "http://localhost:8000/v1"))
+    api_key: str = field(default_factory=lambda: os.environ.get("VLLM_API_KEY", "EMPTY"))
+    timeout_sec: float = 120.0
 
 
 @dataclass(frozen=True)

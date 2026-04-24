@@ -16,8 +16,9 @@ from src.config.settings import AppConfig, EmbeddingConfig, GenerationConfig
 from src.eval.reporting import save_answer_run
 from src.models.siglip_embedder import SigLIP2EmbeddingModel
 from src.rag.answering import BaselineRAGAnsweringService
-from src.rag.qwen_vl_generator import QwenVLGenerator
+from src.rag.openai_generator import OpenAIChatGenerator
 from src.rag.schemas import AnswerRequest, RetrievalPolicy
+from src.retrieval.modal_client import ModalRetrievalService
 from src.retrieval.faiss_store import FaissVectorStore
 from src.retrieval.service import RetrieverService
 
@@ -31,28 +32,45 @@ def main() -> None:
     parser.add_argument("--max-text-items", type=int, default=4)
     parser.add_argument("--max-frame-items", type=int, default=4)
     parser.add_argument("--embedding-model", type=str, default="google/siglip2-base-patch16-224")
-    parser.add_argument("--generation-model", type=str, default="Qwen/Qwen2.5-VL-3B-Instruct")
+    parser.add_argument("--retrieval-backend", type=str, choices=["local", "modal"], default="local")
+    parser.add_argument("--modal-retrieval-app-name", type=str, default="nlp-videoqa-retrieval")
+    parser.add_argument("--modal-retrieval-class-name", type=str, default="RetrievalIndex")
+    parser.add_argument("--modal-index-subdir", type=str, default="indexes/default")
+    parser.add_argument("--generation-model", type=str, default="Qwen/Qwen2.5-7B-Instruct")
+    parser.add_argument("--generation-base-url", type=str, default=None)
+    parser.add_argument("--generation-api-key", type=str, default=None)
     parser.add_argument("--device", type=str, default="cpu")
     parser.add_argument("--output-json", type=Path, default=None)
     args = parser.parse_args()
 
     cfg = AppConfig.default(repo_root=args.repo_root)
-    embedder = SigLIP2EmbeddingModel(
-        EmbeddingConfig(model_name=args.embedding_model, device=args.device, batch_size=16, normalize=True)
-    )
-    store = FaissVectorStore.load(cfg.paths.faiss_index_path, cfg.paths.faiss_ids_path)
-    retriever = RetrieverService(
-        embedder=embedder,
-        vector_store=store,
-        metadata_jsonl_path=str(cfg.paths.metadata_jsonl_path),
-    )
-    generator = QwenVLGenerator(
+    if args.retrieval_backend == "local":
+        embedder = SigLIP2EmbeddingModel(
+            EmbeddingConfig(model_name=args.embedding_model, device=args.device, batch_size=16, normalize=True)
+        )
+        store = FaissVectorStore.load(cfg.paths.faiss_index_path, cfg.paths.faiss_ids_path)
+        retriever = RetrieverService(
+            embedder=embedder,
+            vector_store=store,
+            metadata_jsonl_path=str(cfg.paths.metadata_jsonl_path),
+        )
+    else:
+        retriever = ModalRetrievalService(
+            app_name=args.modal_retrieval_app_name,
+            class_name=args.modal_retrieval_class_name,
+            embedding_model_name=args.embedding_model,
+            index_subdir=args.modal_index_subdir,
+        )
+    generator = OpenAIChatGenerator(
         GenerationConfig(
             model_name=args.generation_model,
             device=args.device,
             max_new_tokens=cfg.generation.max_new_tokens,
             temperature=cfg.generation.temperature,
             do_sample=cfg.generation.do_sample,
+            base_url=args.generation_base_url or cfg.generation.base_url,
+            api_key=args.generation_api_key or cfg.generation.api_key,
+            timeout_sec=cfg.generation.timeout_sec,
         )
     )
     rag = BaselineRAGAnsweringService(retriever=retriever, generator=generator)

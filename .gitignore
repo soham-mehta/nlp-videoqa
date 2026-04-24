@@ -24,3 +24,9 @@ __pycache__/
 
 # Generated index (machine-specific paths); merge via download or rebuild
 /data/metadata/videos_index.json
+
+# Generated evaluation outputs
+/data/eval/*
+
+# Obsolete prototype scaffold replaced by src/agentic
+/agentic_retrieval/

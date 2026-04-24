@@ -14,9 +14,10 @@ This MVP does **only**:
 Create a virtualenv and install deps:
 
 ```bash
-python -m venv .venv
+uv venv .venv
 source .venv/bin/activate
-pip install -r requirements.txt
+uv pip install -r requirements.txt
+modal setup
 ```
 
 Assumptions:
@@ -85,6 +86,13 @@ New modular scaffold for indexing/retrieval lives under:
 - `src/eval/`
 - `src/utils/`
 
+The current benchmark setup uses:
+
+- local indexing to build the FAISS artifacts under `data/indexes/default/`
+- a Modal Volume to store those artifacts for remote retrieval
+- a deployed Modal retrieval service for both baseline and agentic evaluation
+- a deployed Modal vLLM service for answer generation and agent tool calling
+
 Build index:
 
 ```bash
@@ -97,20 +105,23 @@ Query index:
 python3 scripts/query_index.py "How does the speaker set up the project?" --top-k 5
 ```
 
-Scripts under `scripts/` add the repo root to `sys.path`, so you do **not** need `PYTHONPATH=.` for those entrypoints.
-
-Run baseline multimodal RAG answerer (retrieval + Qwen2.5-VL generation):
+Run baseline multimodal RAG answerer against the shared remote vLLM/Modal model:
 
 ```bash
-KMP_DUPLICATE_LIB_OK=TRUE python3 scripts/answer_question.py "What is computer science?" --video-id CxGSnA-RTsA
+VLLM_BASE_URL=http://localhost:8000/v1 python3 scripts/answer_question.py \
+  "What is computer science?" \
+  --video-id CxGSnA-RTsA \
+  --retrieval-backend modal
 ```
 
 This saves a JSON run artifact under `data/runs/answers/` by default.
 
-Run benchmark:
+Run baseline benchmark:
 
 ```bash
-KMP_DUPLICATE_LIB_OK=TRUE python3 scripts/run_benchmark.py --benchmark-path data/benchmark/example_benchmark_v1.jsonl
+VLLM_BASE_URL=http://localhost:8000/v1 python3 scripts/run_benchmark.py \
+  --benchmark-path data/benchmark/example_benchmark_v1.jsonl \
+  --retrieval-backend modal
 ```
 
 While it runs, you should see a **tqdm progress bar** (one step per benchmark question). Use `--no-progress` for CI or plain logs.
@@ -123,13 +134,61 @@ This writes:
 Optional verbose per-question JSONL (metrics + debug only):
 
 ```bash
-KMP_DUPLICATE_LIB_OK=TRUE python3 scripts/run_benchmark.py \
+VLLM_BASE_URL=http://localhost:8000/v1 python3 scripts/run_benchmark.py \
   --benchmark-path data/benchmark/example_benchmark_v1.jsonl \
+  --retrieval-backend modal \
   --detail-jsonl data/eval/benchmark_questions_detail.jsonl
 ```
 
 Schema for predictions: `data/benchmark/prediction_schema_v1.json`.  
 Helper types and builders: `src/eval/prediction_schema.py` (`build_prediction_row`, `validate_prediction_row`).
+
+Run the agentic benchmark over the same index and benchmark questions:
+
+```bash
+VLLM_BASE_URL=http://localhost:8000/v1 python3 scripts/run_agentic_benchmark.py \
+  --benchmark-path data/benchmark/example_benchmark_v1.jsonl \
+  --retrieval-backend modal
+```
+
+This writes:
+
+- `data/eval/agentic_benchmark_run.json` - full agentic run (metrics + per-question debug + prediction rows)
+- `data/eval/agentic_predictions_v1.jsonl` - strict shared-format predictions for grading
+
+Serve the shared remote OpenAI-compatible model on Modal:
+
+```bash
+.venv/bin/modal serve modal_app.py
+```
+
+Deploy a persistent Modal endpoint:
+
+```bash
+.venv/bin/modal deploy modal_app.py
+```
+
+Upload the local FAISS index into a Modal Volume:
+
+```bash
+.venv/bin/python scripts/sync_modal_index.py \
+  --local-index-dir data/indexes/default \
+  --volume-name nlp-videoqa-index \
+  --remote-index-subdir indexes/default
+```
+
+Deploy the Modal retrieval service that loads the FAISS index from that volume:
+
+```bash
+.venv/bin/modal deploy modal_retrieval_app.py
+```
+
+Smoke test both deployed services:
+
+```bash
+.venv/bin/python scripts/check_modal_stack.py \
+  --generation-base-url https://<your-modal-vllm-url>/v1
+```
 
 Compare any system’s **prediction_v1** JSONL against benchmark ground truth:
 
